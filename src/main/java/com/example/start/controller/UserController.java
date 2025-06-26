@@ -14,13 +14,17 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 public class UserController {
     private final UserService userService;
 
-    // 1) 회원가입 폼 보여주기
+
+
+    //  회원가입 폼 보여주기
     @GetMapping("/signup")
     public String showSignupForm(Model model) {
         model.addAttribute("user", new User());
         return "signup";
     }
 
+
+    //  회원가입 처리
     @PostMapping("/signup")
     public String signup(@ModelAttribute User user,
                          RedirectAttributes ra) {
@@ -37,4 +41,40 @@ public class UserController {
         model.addAttribute("user", user);
         return "user-info";
     }
+
+    @GetMapping("/")
+    public String mainPage(@RequestParam(required = false) String name, Model model) {
+        model.addAttribute("name", name);
+        return "main";
+    }
+
+
+    // 로그인
+    @GetMapping("/login")
+    public String showLoginForm(@RequestParam(value = "error", required = false) String error,
+                                Model model) {
+        if (error != null) {
+            model.addAttribute("error", "아이디 또는 비밀번호가 잘못되었습니다.");
+        }
+        return "login";
+    }
+
+    // 로그인 처리
+    @PostMapping("/login")
+    public String login(@RequestParam String username,
+                        @RequestParam String password,
+                        RedirectAttributes ra) {
+
+        User user = userService.findByUsername(username);
+        if (user == null || !user.getPassword().equals(password)) {
+
+            ra.addAttribute("error", "true");
+            return "redirect:/login";
+        }
+
+        return "redirect:/?name=" + user.getName();
+    }
+
+
+
 }
