@@ -4,12 +4,12 @@
 
 사용 기술
 
-Language	Java 17,
-Framework	Spring Boot 3.5.0,
-ORM	Spring Data JPA,
-Template	Thymeleaf,
-DB	MySQL,
-Build Tool	Maven
+Java 17,
+Spring Boot,
+Spring Data JPA,
+Thymeleaf,
+MySQL,
+Maven
 
 기능 요약
 회원가입: 이름, 아이디, 비밀번호 입력 후 가입
