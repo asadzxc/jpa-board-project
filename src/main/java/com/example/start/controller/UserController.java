@@ -50,7 +50,7 @@ public class UserController {
     }
 
 
-    // 로그인
+    // 로그인 실패
     @GetMapping("/login")
     public String showLoginForm(@RequestParam(value = "error", required = false) String error,
                                 Model model) {
@@ -88,4 +88,6 @@ public class UserController {
         session.invalidate(); // 세션 전체 무효화 (로그아웃)
         return "redirect:/"; // 메인 페이지로 이동
     }
+
+
 }
