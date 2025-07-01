@@ -7,12 +7,12 @@
 <body>
 <h1>새 글 작성</h1>
 
-<form th:action="@{/posts}" method="post" th:object="${post}">
+<form th:action="@{/posts/new}" method="post" th:object="${post}">
     <p>제목: <input type="text" th:field="*{title}" /></p>
     <p>내용: <textarea th:field="*{content}"></textarea></p>
     <button type="submit">등록</button>
 </form>
 
-<a href="/">← 메인으로</a>
+<a href="/">메인으로</a>
 </body>
 </html>
