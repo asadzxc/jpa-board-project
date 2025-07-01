@@ -1,6 +1,6 @@
 프로젝트 소개 - JPA 게시판
 이 프로젝트는 Spring Boot + JPA를 기반으로 한 간단한 게시판 웹 애플리케이션입니다.
-주요 기능은 회원가입, 로그인, 로그아웃, 사용자 정보 페이지, 메인 페이지 출력 등입니다.
+주요 기능은 회원가입, 로그인, 로그아웃, 사용자 정보 페이지, 글쓰기 및 게시글 목록 출력 등입니다.
 
 사용 기술
 
@@ -26,19 +26,33 @@ Maven
 
 내 정보 페이지: 회원가입 직후 해당 회원의 정보 출력
 
+게시글 기능 (신규)
+글쓰기: 로그인한 사용자만 가능, 제목/내용 입력 후 등록
+
+글 목록 페이지: 등록된 게시글 전체 조회 (ID / 제목 / 내용)
+
 프로젝트 구조
 
 
 src
  └─ main
      ├─ java
-     │   ├─ controller   # 사용자의 요청을 처리하는 컨트롤러
-     │   ├─ entity       # JPA 엔티티 (데이터베이스 테이블과 매핑)
-     │   ├─ repository   # JPA 리포지토리 인터페이스 (데이터 접근)
-     │   └─ service      # 비즈니스 로직 처리
+     │   └─ com.example.start
+     │       ├─ controller       # 요청 처리 컨트롤러 (UserController, PostController)
+     │       ├─ entity           # JPA 엔티티 (User, Post)
+     │       ├─ repository       # 데이터 접근 레이어 (UserRepository, PostRepository)
+     │       ├─ service          # 서비스 인터페이스
+     │       └─ service.impl     # 서비스 구현체 (UserServiceImpl, PostServiceImpl)
      └─ resources
-         ├─ templates        # Thymeleaf 템플릿
-         └─ application.properties
+         ├─ templates            # Thymeleaf HTML 템플릿
+         │   ├─ main.html
+         │   ├─ login.html
+         │   ├─ signup.html
+         │   ├─ user-info.html
+         │   ├─ post-form.html      # 글쓰기 폼
+         │   └─ post-list.html      # 게시글 목록
+         └─ application.properties # 환경설정 파일
+
 * 실행 방법
 MySQL에서 boarddb 데이터베이스 생성
 
