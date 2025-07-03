@@ -15,4 +15,8 @@ public class Post {
     private String title;
 
     private String content;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id") // post 테이블에 user_id 컬럼 생성
+    private User author;
 }

@@ -3,7 +3,9 @@ package com.example.start.controller;
 
 import com.example.start.entity.User;
 import com.example.start.service.UserService;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import lombok.Setter;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -88,6 +90,7 @@ public class UserController {
         session.invalidate(); // 세션 전체 무효화 (로그아웃)
         return "redirect:/"; // 메인 페이지로 이동
     }
+
 
 
 }

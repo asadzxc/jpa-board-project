@@ -11,9 +11,10 @@
 <table style="border: 1px solid black;">
     <thead>
     <tr>
-        <th>ID</th>
+        <th>번호</th>
         <th>제목</th>
         <th>내용</th>
+        <th>작성자</th>
     </tr>
     </thead>
     <tbody>
@@ -21,6 +22,7 @@
         <td th:text="${post.id}"></td>
         <td th:text="${post.title}"></td>
         <td th:text="${post.content}"></td>
+        <td th:text="${post.author != null ? post.author.name : '익명'}"></td>
     </tr>
     </tbody>
 </table>

@@ -8,6 +8,9 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
+import com.example.start.entity.User;
+import com.example.start.dto.PostForm;
+
 
 @Controller
 @RequiredArgsConstructor
@@ -23,19 +26,27 @@ public class PostController {
             return "redirect:/login";
         }
 
-        model.addAttribute("post", new Post());
+        model.addAttribute("post", new PostForm());
         return "post-form";  // resources/templates/post-form.html
     }
 
     // 글 저장 처리
     @PostMapping("/posts/new")
-    public String createPost(@ModelAttribute Post post, HttpSession session) {
-        if (session.getAttribute("loginUser") == null) {
+    public String createPost(@ModelAttribute PostForm form, HttpSession session) {
+        User loginUser = (User) session.getAttribute("loginUser");
+
+        if (loginUser == null) {
             return "redirect:/login";
         }
 
-        postService.save(post); //  저장 처리
-        return "redirect:/posts"; // 글 목록 페이지로 리다이렉션
+        // 엔티티 수동 생성
+        Post post = new Post();
+        post.setTitle(form.getTitle());
+        post.setContent(form.getContent());
+        post.setAuthor(loginUser);  // 작성자 설정 (중요)
+
+        postService.save(post);
+        return "redirect:/posts";
     }
 
     // 글 목록 페이지
