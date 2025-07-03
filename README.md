@@ -29,7 +29,8 @@ Maven
 게시글 기능 (신규)
 글쓰기: 로그인한 사용자만 가능, 제목/내용 입력 후 등록
 
-글 목록 페이지: 등록된 게시글 전체 조회 (ID / 제목 / 내용)
+글 목록 페이지: 1. 등록된 게시글 전체 조회 (ID / 제목 / 내용)
+               2. 게시글 작성자 저장 및 목록에 이름 표시 기능 추가
 
 프로젝트 구조
 
@@ -39,6 +40,7 @@ src
      ├─ java
      │   └─ com.example.start
      │       ├─ controller       # 요청 처리 컨트롤러 (UserController, PostController)
+     │       ├─ dto              # 데이터 전달 객체 (PostForm 등)
      │       ├─ entity           # JPA 엔티티 (User, Post)
      │       ├─ repository       # 데이터 접근 레이어 (UserRepository, PostRepository)
      │       ├─ service          # 서비스 인터페이스
