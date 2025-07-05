@@ -51,9 +51,40 @@ public class PostController {
 
     // 글 목록 페이지
     @GetMapping("/posts")
-    public String listPosts(Model model) {
+    public String listPosts(Model model, HttpSession session) {
         List<Post> posts = postService.findAll();  // 전체 글 목록 조회
         model.addAttribute("posts", posts);        // 모델에 담기
+
+        // 로그인 사용자 정보를 템플릿에 전달
+        User loginUser = (User) session.getAttribute("loginUser");
+        model.addAttribute("loginUser", loginUser);
+
         return "post-list";                        // templates/post-list.html 렌더링
+    }
+
+    // 삭제 기능
+    @PostMapping("/posts/{id}/delete")
+    public String deletePost(@PathVariable Long id, HttpSession session) {
+        User loginUser = (User) session.getAttribute("loginUser");
+        if (loginUser == null) {
+            return "redirect:/login";
+        }
+
+        postService.deletePostById(id, loginUser); // 작성자 검증 포함
+        return "redirect:/posts";
+    }
+
+    // 내 글만 보여주기
+    @GetMapping("/posts/my")
+    public String myPosts(Model model, HttpSession session) {
+        User loginUser = (User) session.getAttribute("loginUser");
+        if (loginUser == null) {
+            return "redirect:/login";
+        }
+
+        List<Post> myPosts = postService.findPostsByAuthor(loginUser);
+        model.addAttribute("posts", myPosts);
+        model.addAttribute("loginUser", loginUser);
+        return "post-list"; // 재사용: 목록 페이지
     }
 }
