@@ -87,4 +87,12 @@ public class PostController {
         model.addAttribute("loginUser", loginUser);
         return "post-list"; // 재사용: 목록 페이지
     }
+
+    // 게시글 상세 페이지
+    @GetMapping("/posts/{id}")
+    public String showPostDetail(@PathVariable Long id, Model model) {
+        Post post = postService.findById(id); // ID로 게시글 조회
+        model.addAttribute("post", post);
+        return "post-detail"; // templates/post-detail.html 렌더링
+    }
 }
