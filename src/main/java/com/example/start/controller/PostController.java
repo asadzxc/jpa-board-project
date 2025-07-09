@@ -90,9 +90,51 @@ public class PostController {
 
     // 게시글 상세 페이지
     @GetMapping("/posts/{id}")
-    public String showPostDetail(@PathVariable Long id, Model model) {
+    public String showPostDetail(@PathVariable Long id, Model model, HttpSession session) {
         Post post = postService.findById(id); // ID로 게시글 조회
         model.addAttribute("post", post);
+
+        // 로그인 유저 정보를 model에 담기
+        User loginUser = (User) session.getAttribute("loginUser");
+        model.addAttribute("loginUser", loginUser);
+
+
         return "post-detail"; // templates/post-detail.html 렌더링
+    }
+
+    // 글 수정 폼 보여주기
+    @GetMapping("/posts/edit/{id}")
+    public String editPostForm(@PathVariable Long id, HttpSession session, Model model) {
+        User loginUser = (User) session.getAttribute("loginUser");
+        if (loginUser == null) {
+            return "redirect:/login";
+        }
+
+        Post post = postService.findById(id);
+        if (!post.getAuthor().getId().equals(loginUser.getId())) {
+            return "redirect:/posts";
+        }
+
+        PostForm form = new PostForm();
+        form.setTitle(post.getTitle());
+        form.setContent(post.getContent());
+
+        model.addAttribute("postId", id);
+        model.addAttribute("postForm", form); // 수정 폼에 전달할 DTO
+        return "post-edit"; // templates/post-edit.html
+    }
+
+    // 글 수정 처리
+    @PostMapping("/posts/edit/{id}")
+    public String updatePost(@PathVariable Long id,
+                             @ModelAttribute PostForm form,
+                             HttpSession session) {
+        User loginUser = (User) session.getAttribute("loginUser");
+        if (loginUser == null) {
+            return "redirect:/login";
+        }
+
+        postService.updatePost(id, form, loginUser); // 서비스에서 권한 검증 포함
+        return "redirect:/posts/" + id;
     }
 }
