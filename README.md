@@ -29,6 +29,8 @@ Maven
 게시글 기능 (신규)
 글쓰기: 로그인한 사용자만 가능, 제목/내용 입력 후 등록
 
+게시글 페이지 : 1. 댓글 작성 가능
+
 
 
 글 목록 페이지: 1. 등록된 게시글 전체 조회 (ID / 제목 /)
@@ -45,12 +47,12 @@ src
  └─ main
      ├─ java
      │   └─ com.example.start
-     │       ├─ controller       # 요청 처리 컨트롤러 (UserController, PostController)
-     │       ├─ dto              # 데이터 전달 객체 (PostForm 등)
-     │       ├─ entity           # JPA 엔티티 (User, Post)
-     │       ├─ repository       # 데이터 접근 레이어 (UserRepository, PostRepository)
-     │       ├─ service          # 서비스 인터페이스
-     │       └─ service.impl     # 서비스 구현체 (UserServiceImpl, PostServiceImpl)
+     │       ├─ controller       # 요청 처리 컨트롤러 (UserController, PostController, CommentController)
+     │       ├─ dto              # 데이터 전달 객체 (PostForm, CommentForm)
+     │       ├─ entity           # JPA 엔티티 (User, Post, Commnet)
+     │       ├─ repository       # 데이터 접근 레이어 (UserRepository, PostRepository, CommentRepository)
+     │       ├─ service          # 서비스 인터페이스 (CommentService, PostService, UserService)
+     │       └─ service.impl     # 서비스 구현체 (UserServiceImpl, PostServiceImpl, CommnentServiceImpl)
      └─ resources
          ├─ templates            # Thymeleaf HTML 템플릿
          │   ├─ main.html
@@ -58,6 +60,8 @@ src
          │   ├─ signup.html
          │   ├─ user-info.html
          │   ├─ post-form.html      # 글쓰기 폼
+         │   ├─ post-edit.html      # 글수정
+         │   ├─ post-detail.html    # 게시글 내용
          │   └─ post-list.html      # 게시글 목록
          └─ application.properties # 환경설정 파일
 
