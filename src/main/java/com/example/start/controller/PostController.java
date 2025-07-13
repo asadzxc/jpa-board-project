@@ -1,5 +1,6 @@
 package com.example.start.controller;
 
+import com.example.start.dto.CommentForm;
 import com.example.start.entity.Post;
 import com.example.start.service.PostService;
 import jakarta.servlet.http.HttpSession;
@@ -97,6 +98,14 @@ public class PostController {
         // 로그인 유저 정보를 model에 담기
         User loginUser = (User) session.getAttribute("loginUser");
         model.addAttribute("loginUser", loginUser);
+
+        // 댓글 작성 폼 바인딩용 모델 추가
+        model.addAttribute("commentForm", new CommentForm());
+
+        // 추가: 해당 게시글의 댓글 목록 조회
+        model.addAttribute("comments", post.getComments()); // ← 이 코드 빠져 있었음
+
+
 
 
         return "post-detail"; // templates/post-detail.html 렌더링
