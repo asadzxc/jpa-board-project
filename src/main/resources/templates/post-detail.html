@@ -25,6 +25,14 @@
         <strong th:text="${comment.author}">작성자</strong>:
         <span th:text="${comment.content}">댓글 내용</span>
         <div style="font-size: 0.8em;" th:text="${#temporals.format(comment.createdAt, 'yyyy-MM-dd HH:mm')}">작성일</div>
+
+        <!-- 댓글 작성자 본인만 삭제 버튼 보이도록 -->
+        <div th:if="${loginUser != null and comment.author.id == loginUser.id}">
+            <form th:action="@{'/comments/' + ${comment.id} + '/delete'}" method="post">
+                <input type="hidden" name="postId" th:value="${post.id}" />
+                <button type="submit">삭제</button>
+            </form>
+        </div>
     </li>
 </ul>
 

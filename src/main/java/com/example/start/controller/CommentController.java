@@ -25,12 +25,32 @@ public class CommentController {
         // 로그인 상태 확인
         User loginUser = (User) session.getAttribute("loginUser");
 
-        // ✅ 핵심: 로그인 여부에 따라 작성자(author) 결정
-        String author = (loginUser != null)
-                ? loginUser.getUsername()
-                : "익명";
+        if (loginUser == null) {
+            // 로그인 안 된 경우 익명 댓글 불허
+            return "redirect:/login";
+        }
 
-        commentService.create(postId, form.getContent(), author);
+        commentService.create(postId, form.getContent(), loginUser);
+
+        return "redirect:/posts/" + postId;
+    }
+
+    @PostMapping("/comments/{id}/delete")
+    public String deleteComment(@PathVariable("id") Long commentId,
+                                @RequestParam("postId") Long postId,
+                                HttpSession session) {
+        User loginUser = (User) session.getAttribute("loginUser");
+
+        if (loginUser == null) {
+            return "redirect:/login";
+        }
+
+        try {
+            commentService.deleteComment(commentId, loginUser);
+        } catch (IllegalStateException e) {
+            // 작성자가 아닌 경우 → 다시 게시글 페이지로
+            return "redirect:/posts/" + postId + "?error=unauthorized";
+        }
 
         return "redirect:/posts/" + postId;
     }
