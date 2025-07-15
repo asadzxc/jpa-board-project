@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import com.example.start.entity.User;
 import com.example.start.dto.PostForm;
+import com.example.start.service.CommentService;
 
 
 @Controller
@@ -18,6 +19,7 @@ import com.example.start.dto.PostForm;
 public class PostController {
 
     private final PostService postService;
+    private final CommentService commentService;
 
     // 글쓰기 폼 보여주기
     @GetMapping("/posts/new")
@@ -103,7 +105,7 @@ public class PostController {
         model.addAttribute("commentForm", new CommentForm());
 
         // 추가: 해당 게시글의 댓글 목록 조회
-        model.addAttribute("comments", post.getComments()); // ← 이 코드 빠져 있었음
+        model.addAttribute("comments", commentService.findByPostId(post.getId())); //
 
 
 

@@ -30,7 +30,7 @@ public class CommentController {
             return "redirect:/login";
         }
 
-        commentService.create(postId, form.getContent(), loginUser);
+        commentService.create(postId, form.getContent(), form.getParentId(), loginUser);
 
         return "redirect:/posts/" + postId;
     }

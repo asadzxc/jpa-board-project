@@ -20,7 +20,7 @@ public class CommentServiceImpl implements CommentService {
     private final PostRepository postRepository;
 
     @Override
-    public void create(Long postId, String content, User loginUser) {
+    public void create(Long postId, String content, Long parentId, User loginUser) {
         Post post = postRepository.findById(postId)
                 .orElseThrow(() -> new IllegalArgumentException("Post not found"));
 
@@ -29,12 +29,25 @@ public class CommentServiceImpl implements CommentService {
         comment.setAuthor(loginUser);
         comment.setPost(post);
 
+        //  대댓글인 경우 부모 댓글 설정
+        if (parentId != null) {
+            Comment parent = commentRepository.findById(parentId)
+                    .orElseThrow(() -> new IllegalArgumentException("Parent comment not found"));
+            comment.setParent(parent);  // 핵심 라인: 부모 댓글 연결
+        }
+
+
         commentRepository.save(comment);
     }
 
     @Override
     public List<Comment> findByPostId(Long postId) {
-        return commentRepository.findByPostId(postId);
+
+        // ✅ 수정됨: 모든 댓글이 아니라 최상위 댓글만 조회하도록 변경
+        Post post = postRepository.findById(postId)
+                .orElseThrow(() -> new IllegalArgumentException("Post not found"));
+
+        return commentRepository.findByPostAndParentIsNull(post);
     }
 
     @Override
