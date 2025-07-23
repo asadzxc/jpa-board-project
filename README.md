@@ -1,78 +1,98 @@
-프로젝트 소개 - JPA 게시판
-이 프로젝트는 Spring Boot + JPA를 기반으로 한 간단한 게시판 웹 애플리케이션입니다.
-주요 기능은 회원가입, 로그인, 로그아웃, 사용자 정보 페이지, 글쓰기 및 삭제, 게시글 목록, 작성한 글 페이지, 댓글 작성 및 삭제 등입니다.
+#  JPA 게시판 프로젝트
 
-사용 기술
+이 프로젝트는 **Spring Boot + JPA** 기반의 간단한 게시판 웹 애플리케이션입니다.  
+회원 기능, 게시글, 댓글 CRUD, 관리자 대시보드 등 **웹 서비스의 기본 요소들을 전반적으로 다룹니다.**
 
-Java 17,
-Spring Boot,
-Spring Data JPA,
-Thymeleaf,
-MySQL,
-Maven
+---
 
-기능 요약
-회원가입: 이름, 아이디, 비밀번호 입력 후 가입
+##  사용 기술 스택
 
-로그인: 아이디와 비밀번호로 로그인 처리
+- Java 17
+- Spring Boot
+- Spring Data JPA
+- Thymeleaf
+- MySQL
+- Maven
 
-로그아웃: 세션을 통해 로그아웃 처리
+---
 
-메인 페이지:
+##  테스트용 계정
 
-로그인 상태일 경우: {사용자 이름}님 환영합니다! 표시 + 로그아웃 버튼, 글 목록 버튼
+| 역할     | ID         | PW     |
+|----------|------------|--------|
+| 관리자   | admin      | 1234   |
+| 일반회원 | kim80777   | 1234   |
 
-비로그인 상태일 경우: 로그인 / 회원가입 링크 표시
+---
 
-내 정보 페이지: 회원가입 직후 해당 회원의 정보 출력
+##  주요 기능 요약
 
-게시글 기능 (신규)
-글쓰기: 로그인한 사용자만 가능, 제목/내용 입력 후 등록
+###  사용자 기능
 
-게시글 페이지 : 1. 댓글 작성 가능
-               2. 로그인한 아이디로 작성한 댓글만 삭제 가능
-               3. 대댓글 기능 추가(자신의 아이디로 작성한 대댓글만 삭제 가능)
+- **회원가입**: 이름, 아이디, 비밀번호 입력
+- **로그인 / 로그아웃**: 세션 기반 인증 처리
+- **내 정보 페이지**: 회원가입 직후 바로 확인 가능
+- **게시글 작성**: 로그인한 사용자만 가능
+- **게시글 목록**: 전체 조회, 내가 쓴 글만 보기 필터링 가능
+- **게시글 상세 보기**: 댓글 작성 및 수정/삭제 가능
+- **댓글 기능**: 
+  - 대댓글 지원
+  - 본인이 작성한 댓글/대댓글만 삭제 가능
 
+---
 
+###  관리자 기능
 
-글 목록 페이지: 1. 등록된 게시글 전체 조회 (ID / 제목 /)
-               2. 게시글 작성자 저장 및 목록에 이름 표시 기능 추가
-               3. 게시글 삭제 기능 - 로그인한 아이디만
-               4. 내가 쓴 글만 보기 버튼 + 내가 쓴 글만 모아둔 페이지로 이동
-               5. 게시글을 누르면 상세 페이지로 이동
-               6. 상세 페이지에서 내가 작성한 글이면 수정 가능
+- **대시보드**: 회원 수, 게시글 수, 댓글 수
+- **회원 목록 관리**: 회원 전체 조회 및 삭제
+- **게시글 목록 관리**: 게시글 전체 조회 및 삭제
+- **댓글 목록 관리**: 댓글 전체 조회 및 삭제
 
-프로젝트 구조
+---
 
+##  프로젝트 구조
 
+```plaintext
 src
  └─ main
      ├─ java
      │   └─ com.example.start
-     │       ├─ controller       # 요청 처리 컨트롤러 (UserController, PostController, CommentController)
-     │       ├─ dto              # 데이터 전달 객체 (PostForm, CommentForm)
-     │       ├─ entity           # JPA 엔티티 (User, Post, Commnet)
-     │       ├─ repository       # 데이터 접근 레이어 (UserRepository, PostRepository, CommentRepository)
-     │       ├─ service          # 서비스 인터페이스 (CommentService, PostService, UserService)
-     │       └─ service.impl     # 서비스 구현체 (UserServiceImpl, PostServiceImpl, CommnentServiceImpl)
+     │       ├─ controller       # 요청 처리 컨트롤러 (AdminController, UserController, PostController, CommentController)
+     │       ├─ dto              # DTO 객체 (PostForm, CommentForm)
+     │       ├─ entity           # JPA 엔티티 (User, Post, Comment)
+     │       ├─ repository       # 데이터 접근 레이어
+     │       ├─ service          # 서비스 인터페이스
+     │       └─ service.impl     # 서비스 구현체
      └─ resources
-         ├─ templates            # Thymeleaf HTML 템플릿
-         │   ├─ main.html
+         ├─ templates
+         │   ├─ admin
+         │   │   ├─ dashboard.html
+         │   │   ├─ user-list.html
+         │   │   ├─ post-list.html
+         │   │   └─ comment-list.html
          │   ├─ login.html
+         │   ├─ main.html
+         │   ├─ post-detail.html
+         │   ├─ post-edit.html
+         │   ├─ post-form.html
+         │   ├─ post-list.html
          │   ├─ signup.html
-         │   ├─ user-info.html
-         │   ├─ post-form.html      # 글쓰기 폼
-         │   ├─ post-edit.html      # 글수정
-         │   ├─ post-detail.html    # 게시글 내용
-         │   └─ post-list.html      # 게시글 목록
-         └─ application.properties # 환경설정 파일
+         │   └─ user-info.html
+         └─ application.properties
 
-* 실행 방법
-MySQL에서 boarddb 데이터베이스 생성
+실행 방법
+1. MySQL에서 boarddb 데이터베이스 생성
+2. application.properties에서 DB 연결 정보 확인
+3. 프로젝트 빌드 및 실행
 
-application.properties에서 DB 설정 확인 (계정/비밀번호)
-
-프로젝트 빌드 후 실행
-
+# macOS / Linux
 ./mvnw spring-boot:run
-브라우저에서 http://localhost:8080 접속
+
+# Windows
+mvnw.cmd spring-boot:run
+
+4. 브라우저에서 http://localhost:8080 접속
+
+시연 예시
+로그인 → 글쓰기 → 댓글 → 관리자 로그인 → 회원/게시글/댓글 관리
+
