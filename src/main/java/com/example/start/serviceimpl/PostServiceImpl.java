@@ -75,5 +75,10 @@ public class PostServiceImpl implements PostService {
         return postRepository.count(); // JpaRepository 기본 메서드 사용 가능
     }
 
+    @Override
+    public void deletePostByAdmin(Long postId) {
+        postRepository.deleteById(postId);  // 권한 체크 없이 삭제
+    }
+
 
 }

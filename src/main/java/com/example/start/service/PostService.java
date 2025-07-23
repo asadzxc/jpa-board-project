@@ -12,5 +12,8 @@ public interface PostService {
     void deletePostById(Long postId, User loginUser);
     List<Post> findPostsByAuthor(User user);
     void updatePost(Long id, PostForm form, User loginUser);
+
+
     long count();
+    void deletePostByAdmin(Long postId);
 }

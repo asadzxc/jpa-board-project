@@ -86,6 +86,20 @@ public class AdminController {
         return "redirect:/admin/comments";
     }
 
+    @PostMapping("/posts/delete/{postId}")
+    public String deletePostByAdmin(@PathVariable Long postId, HttpSession session) {
+        User loginUser = (User) session.getAttribute("loginUser");
+
+        if (loginUser == null || !loginUser.isAdmin()) {
+            return "redirect:/";
+        }
+
+        postService.deletePostByAdmin(postId);
+        return "redirect:/admin/posts";
+    }
+
+
+
 
 
 
