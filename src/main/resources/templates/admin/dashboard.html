@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>관리자 대시보드</title>
+</head>
+<body>
+<h1>관리자 대시보드</h1>
+<p>전체 회원 수: <span th:text="${userCount}"></span></p>
+<p>전체 게시글 수: <span th:text="${postCount}"></span></p>
+<p>전체 댓글 수: <span th:text="${commentCount}"></span></p>
+
+<hr>
+
+<a href="/admin/users">회원 목록 관리</a><br>
+<a href="/admin/posts">게시글 목록 관리</a><br>
+<a href="/admin/comments">댓글 목록 관리</a><br>
+</body>
+</html>

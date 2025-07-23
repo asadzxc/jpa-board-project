@@ -26,4 +26,11 @@ public class User {
     @Column(nullable = false)
     @DateTimeFormat(pattern = "yyyy-MM-dd")
     private LocalDate birthDate;
+
+    @Column(name = "is_admin")
+    private Boolean isAdmin = false;
+
+    public boolean isAdmin() {
+        return Boolean.TRUE.equals(this.isAdmin);
+    }
 }

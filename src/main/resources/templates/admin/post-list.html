@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>관리자 게시글 관리</title>
+</head>
+<body>
+<h1>📂 게시글 관리 (Admin)</h1>
+
+<table border="1">
+  <thead>
+  <tr>
+    <th>번호</th>
+    <th>제목</th>
+    <th>작성자</th>
+    <th>작성일</th>
+    <th>삭제</th>
+  </tr>
+  </thead>
+  <tbody>
+  <tr th:each="post : ${posts}">
+    <td th:text="${post.id}"></td>
+    <td>
+      <a th:href="@{/posts/{id}(id=${post.id})}" th:text="${post.title}"></a>
+    </td>
+    <td th:text="${post.author != null ? post.author.name : '익명'}"></td>
+    <td th:text="${#dates.format(post.createdAt, 'yyyy-MM-dd HH:mm')}"></td>
+    <td>
+      <form th:action="@{'/admin/posts/delete/' + ${post.id}}" method="post">
+        <button type="submit" onclick="return confirm('정말 삭제하시겠습니까?')">삭제</button>
+      </form>
+    </td>
+  </tr>
+  </tbody>
+</table>
+
+<a href="/admin/dashboard">← 대시보드로 돌아가기</a>
+</body>
+</html>

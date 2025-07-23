@@ -5,6 +5,7 @@ import lombok.Getter;
 import lombok.Setter;
 import java.util.ArrayList;
 import java.util.List;
+import java.time.LocalDateTime;
 
 @Entity
 @Getter @Setter
@@ -24,4 +25,12 @@ public class Post {
 
     @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Comment> comments = new ArrayList<>();
+
+    @Column(name = "created_at")
+    private LocalDateTime createdAt;
+
+    @PrePersist
+    public void onCreate() {
+        this.createdAt = LocalDateTime.now();
+    }
 }

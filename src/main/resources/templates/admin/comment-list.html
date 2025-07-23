@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>댓글 목록</title>
+  <style>
+    table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+    th, td { border: 1px solid #ccc; padding: 10px; text-align: center; }
+    th { background-color: #f2f2f2; }
+  </style>
+</head>
+<body>
+
+<h1>댓글 목록</h1>
+
+<table>
+  <thead>
+  <tr>
+    <th>댓글 ID</th>
+    <th>작성자</th>
+    <th>내용</th>
+    <th>작성일</th>
+    <th>게시글 제목</th>
+    <th>삭제</th>
+  </tr>
+  </thead>
+  <tbody>
+  <tr th:each="comment : ${comments}">
+    <td th:text="${comment.id}">1</td>
+    <td th:text="${comment.author.username}">작성자</td>
+    <td th:text="${comment.content}">내용</td>
+    <td th:text="${#temporals.format(comment.createdAt, 'yyyy-MM-dd HH:mm')}">날짜</td>
+    <td th:text="${comment.post.title}">게시글 제목</td>
+    <td>
+      <form th:action="@{'/admin/comments/delete/' + ${comment.id}}" method="post">
+        <button type="submit">삭제</button>
+      </form>
+    </td>
+  </tr>
+  </tbody>
+</table>
+
+<a href="/admin/dashboard">← 대시보드로</a>
+
+</body>
+</html>

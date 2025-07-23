@@ -70,6 +70,10 @@ public class PostServiceImpl implements PostService {
         // 변경 사항은 JPA가 자동 감지 → save() 호출 없이도 적용됨
     }
 
+    @Override
+    public long count() {
+        return postRepository.count(); // JpaRepository 기본 메서드 사용 가능
+    }
 
 
 }

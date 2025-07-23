@@ -78,6 +78,11 @@ public class UserController {
 
         session.setAttribute("loginUser", user);
 
+        // 관리자면 관리자 대시보드로 이동
+        if (user.isAdmin()) {
+            return "redirect:/admin/dashboard";
+        }
+
 
 
         return "redirect:/";

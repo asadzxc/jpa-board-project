@@ -5,6 +5,7 @@ import com.example.start.repository.UserRepository;
 import com.example.start.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -30,4 +31,24 @@ public class UserServiceImpl implements UserService {
     public User findByUsername(String username) {
         return userRepository.findByUsername(username).orElse(null);
     }
+
+
+    // 관리자 페이지용 메서드
+    @Override
+    public List<User> findAll() {
+        return userRepository.findAll();
+    }
+
+    @Override
+    public void deleteById(Long id) {
+        userRepository.deleteById(id);
+    }
+
+    @Override
+    public long count() {
+        return userRepository.count();
+    }
+
+
+
 }
