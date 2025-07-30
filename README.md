@@ -61,6 +61,7 @@ src
      │       ├─ controller       # 요청 처리 컨트롤러 (AdminController, UserController, PostController, CommentController)
      │       ├─ dto              # DTO 객체 (PostForm, CommentForm)
      │       ├─ entity           # JPA 엔티티 (User, Post, Comment)
+     │       ├── enums          # 열거형 타입 (ReactionType)   
      │       ├─ repository       # 데이터 접근 레이어
      │       ├─ service          # 서비스 인터페이스
      │       └─ service.impl     # 서비스 구현체
