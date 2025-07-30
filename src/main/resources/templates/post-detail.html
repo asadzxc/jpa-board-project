@@ -9,6 +9,21 @@
 <p th:text="${post.content}">내용</p>
 <p>작성자: <span th:text="${post.author.name}">작성자</span></p>
 
+<!--  좋아요/싫어요 버튼 -->
+<div th:if="${loginUser != null and loginUser.id != post.author.id}">
+    <form th:action="@{/posts/{id}/react(id=${post.id})}" method="post" style="display: inline;">
+        <input type="hidden" name="type" value="LIKE" />
+        <button type="submit">👍 좋아요</button>
+        <span th:text="${likeCount}">0</span>
+    </form>
+
+    <form th:action="@{/posts/{id}/react(id=${post.id})}" method="post" style="display: inline;">
+        <input type="hidden" name="type" value="DISLIKE" />
+        <button type="submit">👎 싫어요</button>
+        <span th:text="${dislikeCount}">0</span>
+    </form>
+</div>
+
 <!-- 로그인한 사용자가 작성자일 때만 수정 버튼 노출 -->
 <div th:if="${loginUser != null and loginUser.id == post.author.id}">
     <a th:href="@{/posts/edit/{id}(id=${post.id})}">수정하기</a>
@@ -34,7 +49,7 @@
             </form>
         </div>
 
-        <!-- ✅ 로그인한 사용자만 대댓글 작성 가능 -->
+        <!--  로그인한 사용자만 대댓글 작성 가능 -->
         <div th:if="${loginUser != null}">
             <form th:action="@{/posts/{postId}/comments(postId=${post.id})}" method="post">
                 <input type="hidden" name="parentId" th:value="${comment.id}" />
@@ -67,7 +82,7 @@
 <!-- 댓글 작성 폼 -->
 <h3>댓글 작성</h3>
 
-<!-- ✅ 로그인한 사용자만 댓글 작성 가능 -->
+<!--  로그인한 사용자만 댓글 작성 가능 -->
 <div th:if="${loginUser != null}">
     <form th:action="@{/posts/{postId}/comments(postId=${post.id})}" method="post" th:object="${commentForm}">
         <textarea th:field="*{content}" placeholder="댓글을 입력하세요" required></textarea>
@@ -76,7 +91,7 @@
     </form>
 </div>
 
-<!-- ✅ 비로그인 사용자 안내 -->
+<!--  비로그인 사용자 안내 -->
 <div th:if="${loginUser == null}">
     <p><a href="/login">로그인</a> 후 댓글을 작성할 수 있습니다.</p>
 </div>

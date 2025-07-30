@@ -8,7 +8,8 @@ import java.util.List;
 import java.time.LocalDateTime;
 
 @Entity
-@Getter @Setter
+@Getter
+@Setter
 public class Post {
 
     @Id

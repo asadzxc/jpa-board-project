@@ -12,6 +12,8 @@ import java.util.List;
 import com.example.start.entity.User;
 import com.example.start.dto.PostForm;
 import com.example.start.service.CommentService;
+import com.example.start.service.ReactionService;
+import com.example.start.enums.ReactionType;
 
 
 @Controller
@@ -20,6 +22,7 @@ public class PostController {
 
     private final PostService postService;
     private final CommentService commentService;
+    private final ReactionService reactionService;
 
     // 글쓰기 폼 보여주기
     @GetMapping("/posts/new")
@@ -94,23 +97,24 @@ public class PostController {
     // 게시글 상세 페이지
     @GetMapping("/posts/{id}")
     public String showPostDetail(@PathVariable Long id, Model model, HttpSession session) {
-        Post post = postService.findById(id); // ID로 게시글 조회
+        Post post = postService.findById(id); // 게시글 조회
         model.addAttribute("post", post);
 
-        // 로그인 유저 정보를 model에 담기
+        // 로그인 유저 정보
         User loginUser = (User) session.getAttribute("loginUser");
         model.addAttribute("loginUser", loginUser);
 
-        // 댓글 작성 폼 바인딩용 모델 추가
+        // 댓글 폼 + 댓글 목록
         model.addAttribute("commentForm", new CommentForm());
+        model.addAttribute("comments", commentService.findByPostId(post.getId()));
 
-        // 추가: 해당 게시글의 댓글 목록 조회
-        model.addAttribute("comments", commentService.findByPostId(post.getId())); //
+        // Reaction 정보 추가
+        long likeCount = reactionService.countReactions(id, ReactionType.LIKE);
+        long dislikeCount = reactionService.countReactions(id, ReactionType.DISLIKE);
+        model.addAttribute("likeCount", likeCount);
+        model.addAttribute("dislikeCount", dislikeCount);
 
-
-
-
-        return "post-detail"; // templates/post-detail.html 렌더링
+        return "post-detail";
     }
 
     // 글 수정 폼 보여주기
@@ -147,5 +151,20 @@ public class PostController {
 
         postService.updatePost(id, form, loginUser); // 서비스에서 권한 검증 포함
         return "redirect:/posts/" + id;
+    }
+
+    // 좋아요, 싫어요
+    @PostMapping("/posts/{postId}/react")
+    public String reactToPost(@PathVariable Long postId,
+                              @RequestParam ReactionType type,
+                              HttpSession session) {
+        User loginUser = (User) session.getAttribute("loginUser");
+
+        if (loginUser == null) {
+            return "redirect:/login";
+        }
+
+        reactionService.toggleReaction(loginUser, postId, type);
+        return "redirect:/posts/" + postId;
     }
 }
