@@ -7,6 +7,13 @@
 <body>
 <h1>게시글 목록</h1>
 
+<form th:action="@{/posts}" method="get" style="margin-bottom: 20px;">
+    <input type="text" name="title" placeholder="제목 검색" th:value="${title}">
+    <input type="text" name="content" placeholder="내용 검색" th:value="${content}">
+    <input type="text" name="username" placeholder="작성자 검색" th:value="${username}">
+    <button type="submit">검색</button>
+</form>
+
 <a href="/posts/new">글쓰기</a>
 <a th:href="@{/posts/my}" style="margin-left: 10px;">내가 쓴 글만 보기</a>
 

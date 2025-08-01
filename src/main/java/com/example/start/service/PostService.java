@@ -12,6 +12,7 @@ public interface PostService {
     void deletePostById(Long postId, User loginUser);
     List<Post> findPostsByAuthor(User user);
     void updatePost(Long id, PostForm form, User loginUser);
+    List<Post> searchPosts(String title, String content, String username);
 
 
     long count();

@@ -81,4 +81,10 @@ public class PostServiceImpl implements PostService {
     }
 
 
+    @Override
+    public List<Post> searchPosts(String title, String content, String username) {
+        return postRepository.searchByConditions(title, content, username);
+    }
+
+
 }

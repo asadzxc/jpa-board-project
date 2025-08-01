@@ -55,17 +55,28 @@ public class PostController {
         return "redirect:/posts";
     }
 
-    // 글 목록 페이지
     @GetMapping("/posts")
-    public String listPosts(Model model, HttpSession session) {
-        List<Post> posts = postService.findAll();  // 전체 글 목록 조회
-        model.addAttribute("posts", posts);        // 모델에 담기
+    public String listPosts(
+            @RequestParam(required = false) String title,
+            @RequestParam(required = false) String content,
+            @RequestParam(required = false) String username,
+            Model model,
+            HttpSession session
+    ) {
+        // 조건에 따라 검색된 게시글 리스트 조회
+        List<Post> posts = postService.searchPosts(title, content, username);
+        model.addAttribute("posts", posts);
 
-        // 로그인 사용자 정보를 템플릿에 전달
+        // 검색어 입력값 유지용
+        model.addAttribute("title", title);
+        model.addAttribute("content", content);
+        model.addAttribute("username", username);
+
+        // 로그인 사용자 정보
         User loginUser = (User) session.getAttribute("loginUser");
         model.addAttribute("loginUser", loginUser);
 
-        return "post-list";                        // templates/post-list.html 렌더링
+        return "post-list";
     }
 
     // 삭제 기능
@@ -167,4 +178,6 @@ public class PostController {
         reactionService.toggleReaction(loginUser, postId, type);
         return "redirect:/posts/" + postId;
     }
+
+
 }
