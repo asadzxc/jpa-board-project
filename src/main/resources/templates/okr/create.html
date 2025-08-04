@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>OKR 만들기</title>
+    <script>
+        let krCount = 3;
+
+        function addKeyResult() {
+            if (krCount >= 5) return;
+
+            const container = document.getElementById("keyResultContainer");
+
+            const div = document.createElement("div");
+            div.className = "kr-input";
+
+            div.innerHTML = `
+                <input type="text" name="keyResults[${krCount}].content" placeholder="핵심 결과 ${krCount + 1}" required />
+                <button type="button" onclick="removeKeyResult(this)">삭제</button>
+            `;
+
+            container.appendChild(div);
+            krCount++;
+        }
+
+        function removeKeyResult(button) {
+            const div = button.parentElement;
+            div.remove();
+            krCount--;
+        }
+    </script>
+</head>
+<body>
+<h1>🎯 새로운 OKR 만들기</h1>
+
+<form th:action="@{/okr/create}" method="post">
+    <label>목표 제목:</label><br>
+    <input type="text" name="title" placeholder="예: 블로그 방문자 2배로 늘리기" required><br><br>
+
+    <label>목표 설명:</label><br>
+    <textarea name="description" rows="3" cols="40" placeholder="목표에 대한 설명을 입력하세요"></textarea><br><br>
+
+    <label>핵심 결과 (최소 3개, 최대 5개):</label>
+    <div id="keyResultContainer">
+        <div><input type="text" name="keyResults[0].content" placeholder="핵심 결과 1" required></div>
+        <div><input type="text" name="keyResults[1].content" placeholder="핵심 결과 2" required></div>
+        <div><input type="text" name="keyResults[2].content" placeholder="핵심 결과 3" required></div>
+    </div>
+
+    <button type="button" onclick="addKeyResult()">➕ 핵심 결과 추가</button>
+    <br><br>
+
+    <button type="submit">✅ 목표 등록</button>
+</form>
+</body>
+</html>

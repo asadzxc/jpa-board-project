@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>Objective 수정</title>
+</head>
+<body>
+<h1>Objective 수정</h1>
+
+<form th:action="@{/okr/edit/{id}(id=${objective.id})}" th:object="${objective}" method="post">
+  <label>제목:</label>
+  <input type="text" th:field="*{title}" />
+  <br><br>
+
+  <label>설명:</label>
+  <textarea th:field="*{description}"></textarea>
+  <br><br>
+
+  <h3>핵심 결과 수정</h3>
+
+  <!-- 1. 기존 keyResults 수정 -->
+  <div th:each="kr, iterStat : *{keyResults}">
+    <label>핵심 결과 [[${iterStat.index + 1}]]:</label>
+    <input type="text" th:field="*{keyResults[__${iterStat.index}__].content}" />
+    <input type="hidden" th:field="*{keyResults[__${iterStat.index}__].id}" />
+    <br><br>
+  </div>
+
+  <!-- 2. 부족한 만큼 빈 입력 필드 추가 -->
+  <div th:if="${#lists.size(objective.keyResults) < 5}"
+       th:each="i : ${#numbers.sequence(objective.keyResults.size(), 4)}">
+    <label>핵심 결과 [[${i + 1}]]:</label>
+    <input type="text" th:field="*{keyResults[__${i}__].content}" placeholder="새 핵심 결과 내용 입력" />
+    <input type="hidden" th:field="*{keyResults[__${i}__].id}" />
+    <br><br>
+  </div>
+
+  <button type="submit">수정 완료</button>
+</form>
+
+</body>
+</html>
