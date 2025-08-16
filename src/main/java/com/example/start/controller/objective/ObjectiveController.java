@@ -11,6 +11,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import com.example.start.dto.objective.ObjectiveResponse;
+import com.example.start.service.objective.DailyCheckService;
 
 import java.util.List;
 
@@ -20,6 +22,7 @@ import java.util.List;
 public class ObjectiveController {
 
     private final ObjectiveService objectiveService;
+    private final DailyCheckService dailyCheckService;
 
     // ✅ OKR 목록 조회
     @GetMapping
@@ -27,7 +30,7 @@ public class ObjectiveController {
         User loginUser = (User) session.getAttribute("loginUser");
         if (loginUser == null) return "redirect:/login";
 
-        List<Objective> objectives = objectiveService.findByUser(loginUser);
+        List<ObjectiveResponse> objectives = objectiveService.findObjectiveResponsesByUser(loginUser); // ✅ DTO로 변경
         model.addAttribute("objectives", objectives);
         return "okr/list";
     }
@@ -89,6 +92,13 @@ public class ObjectiveController {
     @PostMapping("/delete/{id}")
     public String deleteObjective(@PathVariable Long id) {
         objectiveService.deleteById(id);
+        return "redirect:/okr";
+    }
+
+    // ✅ 핵심 결과 체크 토글 처리
+    @PostMapping("/check")
+    public String toggleKeyResultCheck(@RequestParam Long keyResultId) {
+        dailyCheckService.toggleCheck(keyResultId);
         return "redirect:/okr";
     }
 

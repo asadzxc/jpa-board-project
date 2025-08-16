@@ -4,6 +4,8 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.NoArgsConstructor;
+import java.util.List;
+import java.util.ArrayList;
 
 @Entity
 @Getter
@@ -22,4 +24,8 @@ public class KeyResult {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "objective_id")
     private Objective objective;
+
+    // ✅ 실천 체크 기록 연관관계 추가 (1:N)
+    @OneToMany(mappedBy = "keyResult", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<DailyCheck> dailyChecks = new ArrayList<>();
 }

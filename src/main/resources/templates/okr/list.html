@@ -18,12 +18,23 @@
 
 <div th:each="objective : ${objectives}" style="margin-bottom: 30px; border-bottom: 1px solid #ccc; padding-bottom: 20px;">
   <h2 th:text="${objective.title}">Objective 제목</h2>
+  <span th:text="${objective.dDay}" style="margin-left: 10px; font-weight: bold; color: darkgreen;"></span>
   <p th:text="${objective.description}">Objective 설명</p>
 
   <ul>
-    <li th:each="kr : ${objective.keyResults}"
-        th:text="${kr.content}">
-      Key Result 내용
+    <li th:each="kr : ${objective.keyResults}">
+    <span th:text="${kr.content}">Key Result 내용</span>
+
+      <form th:action="@{/okr/check}" method="post" style="display:inline; margin-left: 10px;">
+        <input type="hidden" name="keyResultId" th:value="${kr.id}" />
+        <button
+                type="submit"
+                th:attr="data-id=${kr.id}"
+                th:text="${kr.checkedToday ? '✅ 완료됨' : '⬜ 체크'}"
+                th:class="${kr.checkedToday ? 'checked-btn' : 'unchecked-btn'}"
+                onclick="toggleCheck(this)">
+        </button>
+      </form>
     </li>
   </ul>
 

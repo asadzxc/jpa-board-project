@@ -9,6 +9,12 @@ import com.example.start.service.objective.ObjectiveService;
 import com.example.start.dto.objective.ObjectiveForm;
 import java.util.ArrayList;
 import com.example.start.entity.objective.KeyResult;
+import com.example.start.dto.objective.ObjectiveResponse;
+import com.example.start.service.objective.DailyCheckService;
+import com.example.start.dto.objective.KeyResultResponse;
+import java.time.LocalDate;
+
+
 
 import java.util.List;
 
@@ -17,6 +23,7 @@ import java.util.List;
 public class ObjectiveServiceImpl implements ObjectiveService {
 
     private final ObjectiveRepository objectiveRepository;
+    private final DailyCheckService dailyCheckService;
 
     @Override
     public void saveObjective(Objective objective, User user) {
@@ -76,6 +83,29 @@ public class ObjectiveServiceImpl implements ObjectiveService {
         }
 
         objectiveRepository.save(objective);
+    }
+
+    @Override
+    public List<ObjectiveResponse> findObjectiveResponsesByUser(User user) {
+        List<Objective> objectives = objectiveRepository.findByUserId(user.getId());
+        List<ObjectiveResponse> responses = new ArrayList<>();
+
+        for (Objective objective : objectives) {
+            // ✅ 각 Objective마다 KeyResultResponse 리스트 만들기
+            List<KeyResultResponse> keyResultResponses = new ArrayList<>();
+
+            for (KeyResult kr : objective.getKeyResults()) {
+                boolean checked = dailyCheckService.isChecked(kr.getId(), LocalDate.now());
+                KeyResultResponse krResponse = new KeyResultResponse(kr, checked);
+                keyResultResponses.add(krResponse);
+            }
+
+            // ✅ KeyResultResponse 포함해서 ObjectiveResponse 만들기
+            ObjectiveResponse response = new ObjectiveResponse(objective, keyResultResponses);
+            responses.add(response);
+        }
+
+        return responses;
     }
 
 
