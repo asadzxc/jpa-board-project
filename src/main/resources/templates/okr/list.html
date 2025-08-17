@@ -7,10 +7,8 @@
 <body>
 <h1>OKR 리스트</h1>
 
-<!-- ✅ 메인 페이지 이동 버튼 추가 -->
-<a href="/">
-  <button>메인으로</button>
-</a>
+<!-- ✅ 메인 페이지 이동 버튼 -->
+<a href="/"><button>메인으로</button></a>
 
 <a href="/okr/create" style="margin-left: 10px;">
   <button>새 OKR 작성하기</button>
@@ -23,22 +21,27 @@
 
   <ul>
     <li th:each="kr : ${objective.keyResults}">
-    <span th:text="${kr.content}">Key Result 내용</span>
+      <span th:text="${kr.content}">Key Result 내용</span>
 
+      <!-- 체크 토글: data-id 제거 -->
       <form th:action="@{/okr/check}" method="post" style="display:inline; margin-left: 10px;">
         <input type="hidden" name="keyResultId" th:value="${kr.id}" />
         <button
                 type="submit"
-                th:attr="data-id=${kr.id}"
                 th:text="${kr.checkedToday ? '✅ 완료됨' : '⬜ 체크'}"
-                th:class="${kr.checkedToday ? 'checked-btn' : 'unchecked-btn'}"
-                onclick="toggleCheck(this)">
+                th:class="${kr.checkedToday ? 'checked-btn' : 'unchecked-btn'}">
         </button>
+      </form>
+
+      <!-- KR 개별 삭제: objectiveId hidden 제거(리스트로 리다이렉트 시 불필요) -->
+      <form th:action="@{|/okr/key-results/${kr.id}|}" method="post" style="display:inline; margin-left: 8px;"
+            onsubmit="return confirm('이 핵심 결과를 삭제할까요? 연결된 체크 기록도 함께 삭제됩니다.');">
+        <button type="submit">삭제</button>
       </form>
     </li>
   </ul>
 
-  <!-- 버튼 추가 -->
+  <!-- Objective 수정/삭제 -->
   <a th:href="@{/okr/edit/{id}(id=${objective.id})}">
     <button>수정</button>
   </a>

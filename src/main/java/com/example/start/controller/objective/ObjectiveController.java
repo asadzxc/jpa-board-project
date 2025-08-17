@@ -25,7 +25,7 @@ public class ObjectiveController {
     private final DailyCheckService dailyCheckService;
 
     // ✅ OKR 목록 조회
-    @GetMapping
+    @GetMapping({"","/"})
     public String listObjectives(Model model, HttpSession session) {
         User loginUser = (User) session.getAttribute("loginUser");
         if (loginUser == null) return "redirect:/login";

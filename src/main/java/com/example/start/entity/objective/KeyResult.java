@@ -25,7 +25,17 @@ public class KeyResult {
     @JoinColumn(name = "objective_id")
     private Objective objective;
 
-    // ✅ 실천 체크 기록 연관관계 추가 (1:N)
-    @OneToMany(mappedBy = "keyResult", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "keyResult",
+            cascade = CascadeType.ALL,
+            orphanRemoval = true)
     private List<DailyCheck> dailyChecks = new ArrayList<>();
+
+    public void addDailyCheck(DailyCheck dc) {
+        dailyChecks.add(dc);
+        dc.setKeyResult(this);
+    }
+    public void removeDailyCheck(DailyCheck dc) {
+        dailyChecks.remove(dc);      // orphanRemoval=true → DB에서도 삭제
+        dc.setKeyResult(null);
+    }
 }
