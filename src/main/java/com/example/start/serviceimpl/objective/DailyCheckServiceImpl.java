@@ -2,9 +2,11 @@ package com.example.start.serviceimpl.objective;
 
 import com.example.start.entity.objective.DailyCheck;
 import com.example.start.entity.objective.KeyResult;
+import com.example.start.entity.post.User;
 import com.example.start.repository.objective.DailyCheckRepository;
 import com.example.start.repository.objective.KeyResultRepository;
 import com.example.start.service.objective.DailyCheckService;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -18,37 +20,47 @@ public class DailyCheckServiceImpl implements DailyCheckService {
     private final KeyResultRepository keyResultRepository;
 
     @Override
-    public void toggleCheck(Long keyResultId) {
-        KeyResult keyResult = keyResultRepository.findById(keyResultId)
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 핵심 결과입니다."));
-
-        LocalDate today = LocalDate.now();
-
-        DailyCheck dailyCheck = dailyCheckRepository.findByKeyResultAndDate(keyResult, today)
-                .orElse(null);
-
-        if (dailyCheck == null) {
-            // ✅ 체크 안 되어있으면 → 새로 생성
-            dailyCheck = new DailyCheck(keyResult, today, true);
-            dailyCheckRepository.save(dailyCheck);
-        } else {
-            // ✅ 체크 되어있으면 → 삭제 (체크 해제)
-            dailyCheckRepository.delete(dailyCheck);
-        }
+    @Transactional
+    public void toggleCheck(User user, Long keyResultId) {
+        toggleCheck(user, keyResultId, LocalDate.now());
     }
 
     @Override
-    public boolean isCheckedToday(Long keyResultId) {
-        KeyResult keyResult = keyResultRepository.findById(keyResultId)
+    @Transactional
+    public boolean isCheckedToday(User user, Long keyResultId) {
+        return isChecked(user, keyResultId, LocalDate.now());
+    }
+
+    @Override
+    @Transactional
+    public void toggleCheck(User user, Long keyResultId, LocalDate date) {
+        KeyResult kr = keyResultRepository.findById(keyResultId)
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 핵심 결과입니다."));
 
-        return dailyCheckRepository.findByKeyResultAndDate(keyResult, LocalDate.now())
+        // KR 소유권 검증 (이중 방어)
+        if (!kr.getObjective().getUser().getId().equals(user.getId())) {
+            throw new IllegalStateException("권한이 없습니다.");
+        }
+
+        DailyCheck dc = dailyCheckRepository
+                .findByUser_IdAndKeyResult_IdAndDate(user.getId(), keyResultId, date)
+                .orElseGet(() -> {
+                    // 없으면 생성(초기 checked=false)
+                    DailyCheck created = DailyCheck.of(user, kr, date);
+                    return dailyCheckRepository.save(created);
+                });
+
+        // 삭제 대신 checked 플래그 토글
+        dc.setChecked(!dc.isChecked());
+        dailyCheckRepository.save(dc);
+    }
+
+    @Override
+    @Transactional
+    public boolean isChecked(User user, Long keyResultId, LocalDate date) {
+        return dailyCheckRepository
+                .findByUser_IdAndKeyResult_IdAndDate(user.getId(), keyResultId, date)
                 .map(DailyCheck::isChecked)
                 .orElse(false);
-    }
-
-    @Override
-    public boolean isChecked(Long keyResultId, LocalDate date) {
-        return dailyCheckRepository.existsByKeyResultIdAndDate(keyResultId, date);
     }
 }

@@ -1,54 +1,97 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org" lang="ko">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8"/>
   <title>OKR 리스트</title>
+  <style>
+    :root { --border:#e5e7eb; --bg:#f9fafb; --muted:#6b7280; --ok:#10b981; --warn:#f59e0b; --danger:#ef4444; }
+    body { font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto; margin: 24px; }
+    h1 { margin: 0 0 12px 0; }
+    .toolbar { display:flex; gap:8px; align-items:center; margin-bottom: 12px; }
+    .toolbar input[type="date"] { padding:6px 8px; border:1px solid var(--border); border-radius:8px; }
+    .btn { padding:6px 10px; border:1px solid var(--border); border-radius:8px; background:white; cursor:pointer; }
+    .btn.primary { background:#111827; color:white; border-color:#111827; }
+    .btn.link { background:none; border:none; color:#2563eb; cursor:pointer; }
+    .grid { display:grid; gap:16px; }
+    @media(min-width:900px){ .grid { grid-template-columns: 1fr 1fr; } }
+    .card { border:1px solid var(--border); border-radius:12px; padding:14px; background:white; }
+    .card h2 { margin:0 0 8px 0; font-size:18px; }
+    .desc { color:var(--muted); margin-bottom:10px; white-space:pre-wrap; }
+    .badge { display:inline-block; padding:2px 8px; border-radius:999px; font-size:12px; margin-left:6px; border:1px solid var(--border); }
+    .badge.dday { border-color:var(--warn); color:#92400e; background:#fffbeb; }
+    .kr { display:flex; gap:10px; align-items:center; justify-content:space-between; padding:8px 0; border-top:1px dashed var(--border); }
+    .kr:first-of-type { border-top:none; }
+    .kr-left { display:flex; gap:10px; align-items:center; }
+    .chip { font-size:12px; padding:2px 8px; border:1px solid var(--border); border-radius:999px; color:var(--muted); }
+    .state { font-size:12px; padding:2px 8px; border-radius:999px; }
+    .state.done { background:#ecfdf5; color:#065f46; border:1px solid #d1fae5; }
+    .state.todo { background:#fef2f2; color:#991b1b; border:1px solid #fee2e2; }
+  </style>
 </head>
 <body>
+
 <h1>OKR 리스트</h1>
 
-<!-- ✅ 메인 페이지 이동 버튼 -->
-<a href="/"><button>메인으로</button></a>
-
-<a href="/okr/create" style="margin-left: 10px;">
-  <button>새 OKR 작성하기</button>
-</a>
-
-<div th:each="objective : ${objectives}" style="margin-bottom: 30px; border-bottom: 1px solid #ccc; padding-bottom: 20px;">
-  <h2 th:text="${objective.title}">Objective 제목</h2>
-  <span th:text="${objective.dDay}" style="margin-left: 10px; font-weight: bold; color: darkgreen;"></span>
-  <p th:text="${objective.description}">Objective 설명</p>
-
-  <ul>
-    <li th:each="kr : ${objective.keyResults}">
-      <span th:text="${kr.content}">Key Result 내용</span>
-
-      <!-- 체크 토글: data-id 제거 -->
-      <form th:action="@{/okr/check}" method="post" style="display:inline; margin-left: 10px;">
-        <input type="hidden" name="keyResultId" th:value="${kr.id}" />
-        <button
-                type="submit"
-                th:text="${kr.checkedToday ? '✅ 완료됨' : '⬜ 체크'}"
-                th:class="${kr.checkedToday ? 'checked-btn' : 'unchecked-btn'}">
-        </button>
-      </form>
-
-      <!-- KR 개별 삭제: objectiveId hidden 제거(리스트로 리다이렉트 시 불필요) -->
-      <form th:action="@{|/okr/key-results/${kr.id}|}" method="post" style="display:inline; margin-left: 8px;"
-            onsubmit="return confirm('이 핵심 결과를 삭제할까요? 연결된 체크 기록도 함께 삭제됩니다.');">
-        <button type="submit">삭제</button>
-      </form>
-    </li>
-  </ul>
-
-  <!-- Objective 수정/삭제 -->
-  <a th:href="@{/okr/edit/{id}(id=${objective.id})}">
-    <button>수정</button>
-  </a>
-
-  <form th:action="@{/okr/delete/{id}(id=${objective.id})}" method="post" style="display:inline;">
-    <button type="submit" onclick="return confirm('정말 삭제하시겠습니까?')">삭제</button>
+<!-- 상단 툴바: 날짜 유지 + 새 목표 버튼 -->
+<div class="toolbar">
+  <form th:action="@{/okr}" method="get">
+    <!-- ✅ 삼항식/temporals 제거: 컨트롤러에서 date를 항상 세팅 -->
+    <input type="date" name="date" th:value="${date}"/>
+    <button type="submit" class="btn">해당 날짜 보기</button>
   </form>
+  <a th:href="@{/okr/create}" class="btn link">+ 새 목표 만들기</a>
+</div>
+
+<!-- 목표 카드 그리드 -->
+<div class="grid">
+  <div class="card" th:each="obj : ${objectives}">
+    <h2>
+      <span th:text="${obj.title}">목표 제목</span>
+      <span class="badge dday" th:if="${obj.dDay != null}" th:text="${obj.dDay}">D-14</span>
+    </h2>
+    <div class="desc" th:text="${obj.description}">목표 설명...</div>
+
+    <!-- KR 리스트 -->
+    <div class="kr" th:each="kr : ${obj.keyResults}">
+      <div class="kr-left">
+        <span class="chip" th:text="${'Progress ' + kr.progress + '%'}">Progress 0%</span>
+        <div><div th:text="${kr.content}">핵심 결과 내용</div></div>
+      </div>
+
+      <div style="display:flex; gap:8px; align-items:center;">
+        <span class="state" th:classappend="${kr.checkedToday} ? ' done' : ' todo'"
+              th:text="${kr.checkedToday} ? '완료' : '미완료'">미완료</span>
+
+        <!-- 체크 토글 폼 -->
+        <form th:action="@{/okr/check}" method="post" style="display:inline;">
+          <input type="hidden" name="keyResultId" th:value="${kr.id}"/>
+          <!-- ✅ hidden date도 간단히 -->
+          <input type="hidden" name="date" th:value="${date}"/>
+          <!-- ✅ CSRF 토큰 (Security 사용 시) -->
+          <input type="hidden" th:if="${_csrf != null}"
+                 th:name="${_csrf.parameterName}"
+                 th:value="${_csrf.token}"/>
+          <button type="submit" class="btn" th:text="${kr.checkedToday} ? '해제' : '완료'">완료</button>
+        </form>
+      </div>
+    </div>
+
+    <!-- 하단: 수정/삭제 -->
+    <div style="margin-top:12px; display:flex; gap:8px;">
+      <form th:action="@{|/okr/edit/${obj.id}|}" method="get">
+        <button type="submit" class="btn">수정</button>
+      </form>
+
+      <form th:action="@{|/okr/delete/${obj.id}|}" method="post"
+            onsubmit="return confirm('정말 삭제하시겠습니까? 이 목표와 KR이 삭제됩니다.');">
+        <!-- ✅ CSRF 토큰 (POST 이므로 필요) -->
+        <input type="hidden" th:if="${_csrf != null}"
+               th:name="${_csrf.parameterName}"
+               th:value="${_csrf.token}"/>
+        <button type="submit" class="btn">삭제</button>
+      </form>
+    </div>
+  </div>
 </div>
 
 </body>

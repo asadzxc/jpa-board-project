@@ -2,18 +2,20 @@ package com.example.start.controller.objective;
 
 import com.example.start.dto.objective.KeyResultForm;
 import com.example.start.dto.objective.ObjectiveForm;
+import com.example.start.dto.objective.ObjectiveResponse;
 import com.example.start.entity.objective.KeyResult;
 import com.example.start.entity.objective.Objective;
 import com.example.start.entity.post.User;
+import com.example.start.service.objective.DailyCheckService;
 import com.example.start.service.objective.ObjectiveService;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
-import com.example.start.dto.objective.ObjectiveResponse;
-import com.example.start.service.objective.DailyCheckService;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @Controller
@@ -95,11 +97,17 @@ public class ObjectiveController {
         return "redirect:/okr";
     }
 
-    // ✅ 핵심 결과 체크 토글 처리
     @PostMapping("/check")
-    public String toggleKeyResultCheck(@RequestParam Long keyResultId) {
-        dailyCheckService.toggleCheck(keyResultId);
-        return "redirect:/okr";
+    public String toggleKeyResultCheck(@RequestParam Long keyResultId,
+                                       @RequestParam(value = "date", required = false)
+                                       @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date,
+                                       HttpSession session) {
+        User loginUser = (User) session.getAttribute("loginUser");
+        if (loginUser == null) return "redirect:/login";
+        if (date == null) date = LocalDate.now();
+
+        dailyCheckService.toggleCheck(loginUser, keyResultId, date);
+        return "redirect:/okr?date=" + date;
     }
 
 

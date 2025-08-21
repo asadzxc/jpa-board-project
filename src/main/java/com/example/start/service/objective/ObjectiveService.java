@@ -24,7 +24,7 @@ public interface ObjectiveService {
     // 목표 수정
     void updateObjective(Long id, ObjectiveForm form, User user);
 
-    // D-데이 계산
+    // D-데이 계산 포함된 DTO 반환 (오늘 기준 checkedToday 포함)
     List<ObjectiveResponse> findObjectiveResponsesByUser(User user);
 
 }
