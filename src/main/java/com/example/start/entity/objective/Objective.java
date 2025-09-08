@@ -3,54 +3,33 @@ package com.example.start.entity.objective;
 import com.example.start.entity.post.User;
 import jakarta.persistence.*;
 import lombok.Getter;
-import lombok.Setter;
 import lombok.NoArgsConstructor;
-import org.springframework.data.jpa.domain.support.AuditingEntityListener;
-import org.springframework.data.annotation.CreatedDate;
+import lombok.Setter;
 
-
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
 @Entity
-@EntityListeners(AuditingEntityListener.class)
-@Getter
-@Setter
+@Getter @Setter
 @NoArgsConstructor
 public class Objective {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String title;         // 목표 제목
-    private String description;   // 목표 설명
+    private String title;
+    private String description;
 
-    private LocalDate startDate;  // 시작일 (기본: 오늘)
-    private LocalDate endDate;    // 종료일 (기본: 시작일 + 3개월)
+    private LocalDateTime createdDate = LocalDateTime.now();
+    private LocalDateTime startDate;
+    private LocalDateTime endDate;
 
-    // 향후 연관될 KeyResult 리스트 (아직 클래스 안 만들었지만 자리만 미리 잡기)
-    @OneToMany(mappedBy = "objective", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<KeyResult> keyResults = new ArrayList<>();
-
-    // 나중에 로그인한 유저별 목표로 연결할 예정
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id")
+    @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
-    @CreatedDate
-    @Column(updatable = false)
-    private LocalDate createdDate;
-
-    // 저장 전 자동 날짜 계산
-    @PrePersist
-    public void prePersist() {
-        if (startDate == null) {
-            startDate = LocalDate.now();
-        }
-        if (endDate == null) {
-            endDate = startDate.plusMonths(3);
-        }
-    }
+    // ✅ Objective 삭제/수정 시 KR을 함께 관리
+    @OneToMany(mappedBy = "objective", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<KeyResult> keyResults = new ArrayList<>();
 }

@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="ko">
+<head>
+  <meta charset="UTF-8"/>
+  <title>KR 세부</title>
+  <style>
+    :root {
+      --border:#e5e7eb; --bg:#f9fafb; --muted:#6b7280; --ok:#10b981; --text:#111827;
+    }
+    body { font-family: system-ui, sans-serif; background: var(--bg); color: var(--text); margin: 0; }
+    .wrap { max-width: 840px; margin: 40px auto; background: #fff; border:1px solid var(--border); border-radius: 16px; padding: 24px; }
+    .title { font-size: 20px; font-weight: 700; margin: 0 0 8px; }
+    .sub { color: var(--muted); margin-bottom: 16px; }
+
+    .stats { display:flex; align-items:center; justify-content: space-between; margin: 16px 0 24px; }
+    .percent { font-size: 28px; font-weight: 800; }
+    .range { color: var(--muted); }
+
+    .bars { display:grid; grid-template-columns: repeat(7, 1fr); gap: 8px; }
+    .bar {
+      height: 120px; border:1px solid var(--border); border-radius: 12px; display:flex; align-items:flex-end; justify-content:center;
+      background: #fff; position: relative; overflow: hidden;
+    }
+    .bar::after { content:""; width:100%; height:0%; position:absolute; bottom:0; left:0; background: var(--ok); transition: height .2s ease; }
+    .bar.done::after { height:100%; }
+    .label { position:absolute; bottom:6px; font-size:12px; background: rgba(255,255,255,.8); padding: 2px 6px; border-radius: 8px; border:1px solid var(--border); }
+
+    .actions { margin-top: 24px; display:flex; gap:12px; }
+    .btn {
+      border:1px solid var(--border); padding:10px 14px; border-radius: 12px; cursor: pointer; background:#fff;
+    }
+    .btn.ok { background: var(--ok); color:#fff; border-color: var(--ok); }
+    .muted { color: var(--muted); font-size: 13px; }
+  </style>
+</head>
+<body>
+<div class="wrap">
+  <h1 class="title" th:text="${detail.keyResultContent}">핵심 결과 내용</h1>
+  <div class="sub">
+    <span class="range"
+          th:text="${#temporals.format(detail.weekStart, 'MM.dd')} + ' ~ ' + ${#temporals.format(detail.weekEnd, 'MM.dd')}">
+      09.08 ~ 09.14
+    </span>
+  </div>
+
+  <div class="stats">
+    <div class="percent">
+      <span th:text="${detail.percent}">0</span>% 달성
+    </div>
+    <div class="muted">
+      <span th:text="${detail.checkedCount}">0</span> / 7 일
+    </div>
+  </div>
+
+  <div class="bars">
+    <div th:each="d, iterStat : ${detail.days}"
+         th:classappend="${detail.checkedDays.contains(d)} ? 'bar done' : 'bar'">
+      <div class="label"
+           th:text="${#temporals.format(d, 'E')}">월</div>
+    </div>
+  </div>
+
+  <div class="actions">
+    <form th:action="@{|/okr/kr/${detail.keyResultId}/toggle-today|}" method="post">
+      <button type="submit" class="btn ok">오늘 체크/해제</button>
+    </form>
+    <a th:href="@{/okr}" class="btn">OKR 목록으로</a>
+  </div>
+
+  <p class="muted" style="margin-top:10px;">※ 오늘 날짜만 체크/해제가 가능합니다.</p>
+</div>
+</body>
+</html>

@@ -2,17 +2,17 @@ package com.example.start.controller.objective;
 
 import com.example.start.dto.objective.KeyResultForm;
 import com.example.start.dto.objective.ObjectiveForm;
+import com.example.start.dto.objective.ObjectiveResponse;
 import com.example.start.entity.objective.KeyResult;
 import com.example.start.entity.objective.Objective;
 import com.example.start.entity.post.User;
+import com.example.start.service.objective.DailyCheckService;
 import com.example.start.service.objective.ObjectiveService;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
-import com.example.start.dto.objective.ObjectiveResponse;
-import com.example.start.service.objective.DailyCheckService;
 
 import java.util.List;
 
@@ -24,43 +24,41 @@ public class ObjectiveController {
     private final ObjectiveService objectiveService;
     private final DailyCheckService dailyCheckService;
 
-    // ✅ OKR 목록 조회
     @GetMapping({"","/"})
     public String listObjectives(Model model, HttpSession session) {
         User loginUser = (User) session.getAttribute("loginUser");
         if (loginUser == null) return "redirect:/login";
 
-        List<ObjectiveResponse> objectives = objectiveService.findObjectiveResponsesByUser(loginUser); // ✅ DTO로 변경
+        List<ObjectiveResponse> objectives = objectiveService.findObjectiveResponsesByUser(loginUser);
         model.addAttribute("objectives", objectives);
         return "okr/list";
     }
 
-    // ✅ OKR 생성 폼
     @GetMapping("/create")
     public String showCreateForm(Model model) {
         model.addAttribute("objectiveForm", new ObjectiveForm());
         return "okr/create";
     }
 
-    // ✅ OKR 저장 처리 (목표 + 핵심 결과)
     @PostMapping("/create")
     public String createObjective(@ModelAttribute ObjectiveForm form, HttpSession session) {
         User loginUser = (User) session.getAttribute("loginUser");
         if (loginUser == null) return "redirect:/login";
 
-        // Objective 생성
         Objective objective = new Objective();
         objective.setTitle(form.getTitle());
         objective.setDescription(form.getDescription());
 
-        // KeyResults 생성
-        for (KeyResultForm krForm : form.getKeyResults()) {
-            if (krForm.getContent() != null && !krForm.getContent().isBlank()) {
-                KeyResult kr = new KeyResult();
-                kr.setContent(krForm.getContent());
-                kr.setProgress(0); // 초기값
-                kr.setObjective(objective);
-                objective.getKeyResults().add(kr);
+        if (form.getKeyResults() != null) {
+            for (KeyResultForm krForm : form.getKeyResults()) {
+                if (krForm.getContent() != null && !krForm.getContent().isBlank()) {
+                    KeyResult kr = new KeyResult();
+                    kr.setContent(krForm.getContent());
+                    kr.setProgress(0);
+                    kr.setWeight(1);              // ✅ weight 명시
+                    kr.setObjective(objective);
+                    objective.getKeyResults().add(kr);
+                }
             }
         }
 
@@ -68,7 +66,6 @@ public class ObjectiveController {
         return "redirect:/okr";
     }
 
-    // 수정 페이지 이동
     @GetMapping("/edit/{id}")
     public String editObjectiveForm(@PathVariable Long id, Model model) {
         Objective objective = objectiveService.findById(id);
@@ -76,7 +73,6 @@ public class ObjectiveController {
         return "okr/edit";
     }
 
-    // 수정 처리
     @PostMapping("/edit/{id}")
     public String updateObjective(@PathVariable Long id,
                                   @ModelAttribute ObjectiveForm form,
@@ -88,19 +84,22 @@ public class ObjectiveController {
         return "redirect:/okr";
     }
 
-    // 삭제 처리
     @PostMapping("/delete/{id}")
     public String deleteObjective(@PathVariable Long id) {
         objectiveService.deleteById(id);
         return "redirect:/okr";
     }
 
-    // ✅ 핵심 결과 체크 토글 처리
     @PostMapping("/check")
-    public String toggleKeyResultCheck(@RequestParam Long keyResultId) {
-        dailyCheckService.toggleCheck(keyResultId);
+    public String toggleKeyResultCheck(@RequestParam Long keyResultId, HttpSession session) {
+        User loginUser = (User) session.getAttribute("loginUser");
+        if (loginUser == null) return "redirect:/login";
+
+        // 서비스가 제공하는 실제 시그니처에 맞게 호출
+        dailyCheckService.toggleToday(keyResultId, loginUser);
+
+        // 상세 페이지가 있으면 그쪽으로 보내고, 없으면 목록으로
+        // return "redirect:/okr/kr/" + keyResultId;
         return "redirect:/okr";
     }
-
-
 }

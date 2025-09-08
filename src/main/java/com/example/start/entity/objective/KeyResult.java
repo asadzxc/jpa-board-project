@@ -2,40 +2,43 @@ package com.example.start.entity.objective;
 
 import jakarta.persistence.*;
 import lombok.Getter;
-import lombok.Setter;
 import lombok.NoArgsConstructor;
-import java.util.List;
+import lombok.Setter;
+
 import java.util.ArrayList;
+import java.util.List;
 
 @Entity
-@Getter
-@Setter
+@Getter @Setter
 @NoArgsConstructor
 public class KeyResult {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String content;   // 핵심 결과 내용 (예: 블로그 글 5개 작성)
-    private int progress;     // 진행률 (0~100)
+    @Column(nullable = false)
+    private String content;
 
-    // Objective와의 연관 관계 (N:1)
+    @Column(nullable = false)
+    private int progress;
+
+    // ✅ DB에 NOT NULL인 weight 컬럼과 매핑
+    @Column(nullable = false)
+    private Integer weight;
+
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "objective_id")
+    @JoinColumn(name = "objective_id", nullable = false)
     private Objective objective;
 
-    @OneToMany(mappedBy = "keyResult",
-            cascade = CascadeType.ALL,
-            orphanRemoval = true)
+    // ✅ KR 삭제 시 DailyCheck도 같이 삭제
+    @OneToMany(mappedBy = "keyResult", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<DailyCheck> dailyChecks = new ArrayList<>();
 
-    public void addDailyCheck(DailyCheck dc) {
-        dailyChecks.add(dc);
-        dc.setKeyResult(this);
-    }
-    public void removeDailyCheck(DailyCheck dc) {
-        dailyChecks.remove(dc);      // orphanRemoval=true → DB에서도 삭제
-        dc.setKeyResult(null);
+    @PrePersist
+    @PreUpdate
+    private void ensureDefaults() {
+        if (weight == null) weight = 1;      // 기본값 보장
+        if (content == null) content = "";
+        if (progress < 0) progress = 0;
     }
 }

@@ -1,6 +1,5 @@
 package com.example.start.dto.objective;
 
-import com.example.start.dto.objective.KeyResultResponse;
 import com.example.start.entity.objective.Objective;
 import lombok.Getter;
 
@@ -10,24 +9,37 @@ import java.util.List;
 
 @Getter
 public class ObjectiveResponse {
-    private Long id;
+    private long id;
     private String title;
     private String description;
     private String dDay;
     private List<KeyResultResponse> keyResults;
 
-    // ✅ 이 생성자가 반드시 있어야 빨간 줄 사라짐!
+    // ✅ 생성자
     public ObjectiveResponse(Objective objective, List<KeyResultResponse> keyResults) {
         this.id = objective.getId();
         this.title = objective.getTitle();
         this.description = objective.getDescription();
-        this.dDay = calculateDDay(objective.getCreatedDate());
+
+        // ✅ LocalDateTime -> LocalDate 변환해서 전달
+        LocalDate baseDate = null;
+        if (objective.getEndDate() != null) {
+            baseDate = objective.getEndDate().toLocalDate();
+        } else if (objective.getStartDate() != null) {
+            baseDate = objective.getStartDate().toLocalDate();
+        } else if (objective.getCreatedDate() != null) {
+            baseDate = objective.getCreatedDate().toLocalDate();
+        }
+
+        this.dDay = (baseDate != null) ? calculateDDay(baseDate) : "-";
         this.keyResults = keyResults;
     }
 
-    private String calculateDDay(LocalDate createdDate) {
-        if (createdDate == null) return "D+0";
-        long days = ChronoUnit.DAYS.between(createdDate, LocalDate.now());
-        return days == 0 ? "D-DAY" : (days > 0 ? "D+" + days : "D" + days);
+    // ✅ 오늘 기준 D-day 문자열 계산: D-3 / D-Day / D+2
+    private String calculateDDay(LocalDate targetDate) {
+        long diff = ChronoUnit.DAYS.between(LocalDate.now(), targetDate);
+        if (diff == 0) return "D-Day";
+        if (diff > 0) return "D-" + diff;
+        return "D+" + Math.abs(diff);
     }
 }

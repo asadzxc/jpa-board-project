@@ -1,33 +1,42 @@
 package com.example.start.controller.objective;
 
-import com.example.start.repository.objective.KeyResultRepository;
-import jakarta.persistence.EntityNotFoundException;
+
+
+
+import com.example.start.dto.objective.KeyResultWeekDetailResponse;
+import com.example.start.entity.post.User;
+import com.example.start.service.objective.DailyCheckService;
+import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 @Controller
 @RequiredArgsConstructor
-@RequestMapping("/okr/key-results")
+@RequestMapping("/okr/kr")
 public class KeyResultController {
 
-    private final KeyResultRepository keyResultRepository;
+    private final DailyCheckService dailyCheckService;
 
-    // ✅ 필터 없이 POST로 삭제
-    @PostMapping("/{keyResultId}")
-    public String deleteKeyResult(
-            @PathVariable Long keyResultId
+    // KR 세부 페이지 (주간 7칸 + 퍼센트)
+    @GetMapping("/{keyResultId}")
+    public String detail(@PathVariable Long keyResultId, HttpSession session, Model model) {
+        User loginUser = (User) session.getAttribute("loginUser");
+        if (loginUser == null) return "redirect:/login";
 
-    ) {
-        // (선택) 존재 여부만 확인
-        if (!keyResultRepository.existsById(keyResultId)) {
-            throw new EntityNotFoundException("핵심 결과가 없습니다. id=" + keyResultId);
-        }
+        KeyResultWeekDetailResponse detail = dailyCheckService.getThisWeekDetail(keyResultId, loginUser);
+        model.addAttribute("detail", detail);
+        return "okr/detail"; // templates/okr/kr-detail.html
+    }
 
-        // 삭제 (연관 DailyCheck는 cascade + orphanRemoval 로 함께 삭제)
-        keyResultRepository.deleteById(keyResultId);
+    // 오늘만 토글(체크/해제)
+    @PostMapping("/{keyResultId}/toggle-today")
+    public String toggleToday(@PathVariable Long keyResultId, HttpSession session) {
+        User loginUser = (User) session.getAttribute("loginUser");
+        if (loginUser == null) return "redirect:/login";
 
-        // 삭제 후 목록/상세로 복귀
-        return "redirect:/okr";
+        dailyCheckService.toggleToday(keyResultId, loginUser);
+        return "redirect:/okr/kr/" + keyResultId;
     }
 }
