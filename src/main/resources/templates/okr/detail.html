@@ -26,19 +26,28 @@
     .label { position:absolute; bottom:6px; font-size:12px; background: rgba(255,255,255,.8); padding: 2px 6px; border-radius: 8px; border:1px solid var(--border); }
 
     .actions { margin-top: 24px; display:flex; gap:12px; }
-    .btn {
-      border:1px solid var(--border); padding:10px 14px; border-radius: 12px; cursor: pointer; background:#fff;
-    }
+    .btn { border:1px solid var(--border); padding:10px 14px; border-radius: 12px; cursor: pointer; background:#fff; }
     .btn.ok { background: var(--ok); color:#fff; border-color: var(--ok); }
     .muted { color: var(--muted); font-size: 13px; }
+
+    /* [6번 추가] 통계 카드용 간단 스타일 */
+    .card { border:1px solid var(--border); border-radius:12px; padding:12px; }
+    .kpi { display:flex; justify-content:space-between; align-items:center; }
+    .barline { height:10px; background:#e5e7eb; border-radius:8px; margin-top:8px; }
+    .barfill { height:10px; width:0%; background: var(--ok); border-radius:8px; transition: width .2s ease; }
+    .spark { display:flex; gap:6px; margin-top:8px; flex-wrap:wrap; }
+    .dot { width:14px; height:14px; border-radius:4px; border:1px solid var(--border); background:#e5e7eb; }
+    .dot.today { border:2px solid #111827; }
+    .delta { margin-top:8px; font-size:12px; color: var(--muted); }
   </style>
 </head>
 <body>
 <div class="wrap">
   <h1 class="title" th:text="${detail.keyResultContent}">핵심 결과 내용</h1>
+
   <div class="sub">
     <span class="range"
-          th:text="${#temporals.format(detail.weekStart, 'MM.dd')} + ' ~ ' + ${#temporals.format(detail.weekEnd, 'MM.dd')}">
+          th:text="|${#temporals.format(detail.weekStart,'MM.dd')} ~ ${#temporals.format(detail.weekEnd,'MM.dd')}|">
       09.08 ~ 09.14
     </span>
   </div>
@@ -53,15 +62,48 @@
   </div>
 
   <div class="bars">
-    <div th:each="d, iterStat : ${detail.days}"
-         th:classappend="${detail.checkedDays.contains(d)} ? 'bar done' : 'bar'">
-      <div class="label"
-           th:text="${#temporals.format(d, 'E')}">월</div>
+    <!-- 참고: class 기본값은 'bar', 체크된 날에는 done 클래스만 append -->
+    <div class="bar"
+         th:each="d : ${detail.days}"
+         th:classappend="${detail.checkedDays.contains(d)} ? ' done' : ''">
+      <div class="label" th:text="${#temporals.format(d, 'E')}">월</div>
     </div>
   </div>
 
+  <!-- ============================================================
+       [6번 추가 - 위치 A]
+       주간 막대(.bars) 바로 아래에 '주/월 통계 카드' 섹션을 추가합니다.
+       ============================================================ -->
+  <section id="stats" style="margin-top:16px;">
+    <h3 style="margin:8px 0;">통계</h3>
+
+    <!-- 이번 주 카드 -->
+    <div class="card" style="margin-bottom:12px;">
+      <div class="kpi">
+        <strong>이번 주 달성률</strong>
+        <span id="week-rate">--%</span>
+      </div>
+      <div class="barline"><div id="week-bar" class="barfill"></div></div>
+      <div class="delta">지난 주 대비 <span id="week-delta">--</span>%</div>
+      <div id="week-spark" class="spark"></div>
+    </div>
+
+    <!-- 이번 달 카드 -->
+    <div class="card">
+      <div class="kpi">
+        <strong>이번 달 달성률</strong>
+        <span id="month-rate">--%</span>
+      </div>
+      <div class="barline"><div id="month-bar" class="barfill"></div></div>
+      <div class="delta">지난 달 대비 <span id="month-delta">--</span>%</div>
+      <div id="month-spark" class="spark"></div>
+    </div>
+  </section>
+  <!-- [6번 추가 - 위치 A 끝] -->
+
   <div class="actions">
-    <form th:action="@{|/okr/kr/${detail.keyResultId}/toggle-today|}" method="post">
+    <!-- FIX: action 경로 바인딩은 기존과 동일. detail.keyResultId가 반드시 세팅되어야 함 -->
+    <form th:action="@{/okr/kr/{id}/toggle-today(id=${detail.keyResultId})}" method="post">
       <button type="submit" class="btn ok">오늘 체크/해제</button>
     </form>
     <a th:href="@{/okr}" class="btn">OKR 목록으로</a>
@@ -69,5 +111,93 @@
 
   <p class="muted" style="margin-top:10px;">※ 오늘 날짜만 체크/해제가 가능합니다.</p>
 </div>
+
+<!-- ============================================================
+     [6번 추가 - 위치 B]
+     Ajax로 /okr/stats/kr/{id}/week, /month를 조회해 카드에 렌더링합니다.
+     detail.keyResultId를 안전하게 주입하려면 th:inline="javascript" 사용.
+     ============================================================ -->
+<script th:inline="javascript">
+  (function(){
+    // KR id 주입 (없으면 0)
+    const krId = /*[[${detail.keyResultId}]]*/ 0;
+
+    // 오늘 날짜 문자열 (YYYY-MM-DD)
+    const today = new Date();
+    const yyyy = today.getFullYear(), mm = today.getMonth()+1, dd = today.getDate();
+    const todayStr = `${yyyy}-${String(mm).padStart(2,'0')}-${String(dd).padStart(2,'0')}`;
+
+    // 공통 렌더 함수
+    function setRate(rateId, barId, rate){
+      const r = Math.max(0, Math.min(100, rate|0));
+      document.getElementById(rateId).textContent = r + '%';
+      document.getElementById(barId).style.width = r + '%';
+    }
+    function setDelta(deltaId, delta){
+      const el = document.getElementById(deltaId);
+      const n = parseInt(delta, 10) || 0;
+      el.textContent = (n>=0?'+':'') + n;
+      el.style.color = n>=0 ? '#10b981' : '#ef4444';
+    }
+    function toStr(d){
+      const y = d.getFullYear(), m = d.getMonth()+1, day = d.getDate();
+      return `${y}-${String(m).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
+    }
+    function eachDate(start, end, cb){
+      let d = new Date(start.getTime());
+      while (d <= end){
+        cb(new Date(d));
+        d.setDate(d.getDate()+1);
+      }
+    }
+    function makeDot(dateStr, checkedSet){
+      const div = document.createElement('div');
+      div.className = 'dot' + (dateStr === todayStr ? ' today' : '');
+      if (checkedSet.has(dateStr)) {
+        div.style.background = 'var(--ok)';
+      }
+      return div;
+    }
+
+    // 주간 통계 로드
+    fetch(`/okr/stats/kr/${krId}/week`)
+      .then(r=>r.json())
+      .then(data=>{
+        const cur = data.current || {};
+        setRate('week-rate','week-bar', cur.rate || 0);
+        setDelta('week-delta', data.delta || 0);
+
+        // 스파크라인
+        const spark = document.getElementById('week-spark');
+        spark.innerHTML = '';
+        const start = new Date(cur.start);
+        const end   = new Date(cur.end);
+        const checkedSet = new Set((cur.checkedDates||[]).map(String));
+        eachDate(start, end, (d)=>{
+          spark.appendChild(makeDot(toStr(d), checkedSet));
+        });
+      });
+
+    // 월간 통계 로드
+    fetch(`/okr/stats/kr/${krId}/month`)
+      .then(r=>r.json())
+      .then(data=>{
+        const cur = data.current || {};
+        setRate('month-rate','month-bar', cur.rate || 0);
+        setDelta('month-delta', data.delta || 0);
+
+        // 스파크라인
+        const spark = document.getElementById('month-spark');
+        spark.innerHTML = '';
+        const start = new Date(cur.start);
+        const end   = new Date(cur.end);
+        const checkedSet = new Set((cur.checkedDates||[]).map(String));
+        eachDate(start, end, (d)=>{
+          spark.appendChild(makeDot(toStr(d), checkedSet));
+        });
+      });
+  })();
+</script>
+<!-- [6번 추가 - 위치 B 끝] -->
 </body>
 </html>

@@ -9,4 +9,8 @@ public interface DailyCheckService {
     KeyResultWeekDetailResponse toggleToday(Long keyResultId, User loginUser);
 
     boolean isCheckedToday(Long keyResultId, User loginUser);
+
+    void deleteKeyResult(Long keyResultId, User loginUser);
+
+
 }
