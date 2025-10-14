@@ -68,4 +68,6 @@ public interface DailyCheckRepository extends JpaRepository<DailyCheck, Long> {
                                                @Param("userId") Long userId,
                                                @Param("start") LocalDate start,
                                                @Param("end") LocalDate end);
+
+
 }

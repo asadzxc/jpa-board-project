@@ -86,13 +86,13 @@ public class ObjectiveController {
 
     // ❌ 기존: @DeleteMapping("/delete/{id}")
     // ✅ 변경: 프로토타입 + 숨은 메서드 미사용 기준으로 POST로 맞춤 (템플릿의 method="post" 와 일치)
-    @PostMapping("/delete/{id}")
+    @PostMapping("/{id}/delete")
     public String deleteObjective(@PathVariable Long id, HttpSession session) {
         User loginUser = (User) session.getAttribute("loginUser");
         if (loginUser == null) return "redirect:/login";
 
         // (선택) 소유자 검증이 필요하면 서비스 시그니처 바꿔 loginUser 전달
-        objectiveService.deleteById(id);
+        objectiveService.deleteObjective(id, loginUser);
         return "redirect:/okr";
     }
 

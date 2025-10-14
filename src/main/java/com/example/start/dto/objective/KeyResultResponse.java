@@ -10,6 +10,7 @@ import lombok.Setter;
 public class KeyResultResponse {
     private Long id;
     private String content;
+    private int progress = 0;
 
     // ▼ 템플릿/JS에서 참조하는 필드들
     private boolean checkedToday = false;  // [NEW]
@@ -20,6 +21,7 @@ public class KeyResultResponse {
     public KeyResultResponse(KeyResult kr) {  // [KEEP]
         this.id = kr.getId();
         this.content = kr.getContent();
+        this.progress = kr.getProgress();
     }
 
     // (선택) 한 번에 채우고 싶을 때 쓰는 풀 생성자

@@ -15,6 +15,14 @@
     .kr-meta { color: var(--muted); font-size: 12px; }
     .toast { position:fixed; left:50%; transform:translateX(-50%); bottom:24px; background:#111827; color:#fff; padding:10px 14px; border-radius:10px; opacity:0; pointer-events:none; transition:opacity .2s, transform .2s }
     .toast.show { opacity:1; transform:translateX(-50%) translateY(-6px) }
+
+    /* ✅ 미니 그래프 스타일 */
+    .mini-graphs { display:flex; gap:10px; margin-top:8px; }
+    .mini-graph { display:flex; align-items:center; gap:6px; font-size:12px; color: var(--muted); }
+    .mini-label { font-weight:600; }
+    .mini-bar { width:72px; height:8px; background:#e5e7eb; border-radius:999px; overflow:hidden; }
+    .mini-fill { height:100%; background:var(--ok); transition: width .35s ease; }
+    .mini-percent { min-width:30px; text-align:right; color:#6b7280; }
   </style>
 </head>
 <body>
@@ -25,12 +33,36 @@
   <a href="/okr/create" style="margin-left: 10px;"><button>새 OKR 작성하기</button></a>
 
   <div th:each="objective : ${objectives}" class="obj">
-    <h2 th:text="${objective.title}">Objective 제목</h2>
-    <span th:text="${objective.dDay}" style="margin-left: 10px; font-weight: bold; color: darkgreen;"></span>
+    <div style="display:flex; align-items:center; justify-content:space-between;">
+      <div>
+        <h2 th:text="${objective.title}" style="margin:0;">Objective 제목</h2>
+        <span th:text="${objective.dDay}" style="margin-left: 10px; font-weight: bold; color: darkgreen;"></span>
+      </div>
+
+      <!-- ✅ Objective 삭제 버튼 -->
+      <form th:action="@{/okr/{id}/delete(id=${objective.id})}" method="post"
+            onsubmit="return confirm('이 Objective와 모든 KR/체크 기록을 삭제합니다. 계속할까요?');">
+        <!-- (시큐리티 사용 시) CSRF -->
+        <!-- <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/> -->
+        <button type="submit" class="toggle-btn" style="background:#ef4444; color:#fff; border-color:#ef4444;">삭제</button>
+      </form>
+    </div>
+
     <p th:text="${objective.description}">Objective 설명</p>
 
-    <ul style="list-style:none; padding-left:0;">
+    <!-- ✅ Objective별 KR 추가 폼 -->
+    <form th:action="@{|/okr/kr/objective/${objective.id}/create|}" method="post"
+          style="margin:12px 0 16px; display:flex; gap:8px; flex-wrap:wrap;">
+      <!-- (시큐리티 사용 시) CSRF -->
+      <!-- <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/> -->
+      <input type="text" name="content" placeholder="새 핵심 결과 내용"
+             style="flex:1; padding:8px; border:1px solid var(--border); border-radius:8px;" required>
+      <input type="number" name="progress" min="0" max="100" placeholder="진행률(선택)"
+             style="width:140px; padding:8px; border:1px solid var(--border); border-radius:8px;">
+      <button type="submit" class="toggle-btn">추가</button>
+    </form>
 
+    <ul style="list-style:none; padding-left:0; margin:0;">
       <li class="kr-item"
           th:each="kr : ${objective.keyResults}"
           th:classappend="${kr.checkedToday} ? ' is-checked' : ''"
@@ -38,10 +70,25 @@
         <div style="display:flex; align-items:center; justify-content:space-between; gap:12px">
           <div>
             <span th:text="${kr.content}" class="kr-title">Key Result 내용</span>
+
             <div class="kr-meta">
-              주간 <span th:text="${kr.weekCount}">0</span> ·
-              월간 <span th:text="${kr.monthCount}">0</span> ·
+              주간 <span class="kr-week" th:text="${kr.weekCount}">0</span> ·
+              월간 <span class="kr-month" th:text="${kr.monthCount}">0</span> ·
               연속 <span th:text="${kr.streak}">0</span>일
+            </div>
+
+            <!-- ✅ 미니 그래프 (주/월) -->
+            <div class="mini-graphs">
+              <div class="mini-graph" data-type="week">
+                <span class="mini-label">주</span>
+                <div class="mini-bar"><div class="mini-fill" style="width:0%"></div></div>
+                <span class="mini-percent">0%</span>
+              </div>
+              <div class="mini-graph" data-type="month">
+                <span class="mini-label">월</span>
+                <div class="mini-bar"><div class="mini-fill" style="width:0%"></div></div>
+                <span class="mini-percent">0%</span>
+              </div>
             </div>
           </div>
 
@@ -52,15 +99,34 @@
           </button>
 
           <div style="display:flex; gap:8px; margin-left:12px;">
-            <a th:href="@{|/okr/kr/${kr.id}|}">
-              <button type="button">세부보기</button>
-            </a>
+            <a th:href="@{|/okr/kr/${kr.id}|}"><button type="button">세부보기</button></a>
+            <button type="button" class="edit-toggle-btn">수정</button>
             <form th:action="@{/okr/kr/{id}/delete(id=${kr.id})}" method="post"
                   onsubmit="return confirm('이 핵심 결과를 삭제할까요? 연결된 체크 기록도 함께 삭제됩니다.');">
+              <!-- (시큐리티 사용 시) CSRF -->
+              <!-- <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/> -->
               <button type="submit">삭제</button>
             </form>
           </div>
         </div>
+
+        <!-- ✅ KR 인라인 수정 폼 (기본 숨김) -->
+        <form th:action="@{/okr/kr/{id}/edit(id=${kr.id})}" method="post"
+              class="kr-edit-form" style="display:none; margin-top:10px;">
+          <!-- (시큐리티 사용 시) CSRF -->
+          <!-- <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/> -->
+          <div style="display:flex; gap:8px; flex-wrap:wrap;">
+            <input type="text" name="content" th:value="${kr.content}"
+                   style="flex:1; padding:8px; border:1px solid var(--border); border-radius:8px;" required>
+            <input type="number" name="progress" min="0" max="100" th:value="${kr.progress}"
+                   style="width:140px; padding:8px; border:1px solid var(--border); border-radius:8px;"
+                   placeholder="진행률(0~100)">
+            <div style="display:flex; gap:8px;">
+              <button type="submit" class="toggle-btn">저장</button>
+              <button type="button" class="toggle-btn" data-role="cancel-edit">취소</button>
+            </div>
+          </div>
+        </form>
       </li>
     </ul>
   </div>
@@ -68,7 +134,68 @@
 
 <div id="toast" class="toast" role="status" aria-live="polite"></div>
 
-<!-- [FIX] 정적 리소스 경로는 /js/... (Spring Boot 기본) -->
+<!-- 기존: 체크 토글용 JS -->
 <script src="/js/okr-toggle.js"></script>
+
+<!-- ✅ 인라인 수정 토글 스크립트 -->
+<script>
+  // '수정' 버튼 클릭 시 해당 KR의 수정 폼 열기/닫기
+  document.addEventListener('click', function (e) {
+    const btn = e.target.closest('.edit-toggle-btn');
+    if (!btn) return;
+    const krItem = btn.closest('.kr-item');
+    const form = krItem && krItem.querySelector('.kr-edit-form');
+    if (!form) return;
+    form.style.display = (form.style.display === 'none' || !form.style.display) ? 'block' : 'none';
+  });
+
+  // '취소' 버튼 클릭 시 폼 닫기
+  document.addEventListener('click', function (e) {
+    const cancel = e.target.closest('button[data-role="cancel-edit"]');
+    if (!cancel) return;
+    const form = cancel.closest('.kr-edit-form');
+    if (form) form.style.display = 'none';
+  });
+</script>
+
+<!-- ✅ 미니 그래프 퍼센트 채우기 스크립트 -->
+<script>
+  (function renderMiniGraphs(){
+    const now = new Date();                // 클라이언트 시간 (TZ=Asia/Seoul 환경이면 동일)
+    const dow = (now.getDay() + 6) % 7;    // 월=0, 화=1, ... 일=6 로 환산
+    const weekDenom = dow + 1;             // ✅ 이번 주 월요일부터 ‘오늘까지’ 경과 일수 (1~7)
+
+    const monthDenom = now.getDate();      // ✅ 이번 달 ‘오늘까지’ 경과 일수 (1~31)
+
+    document.querySelectorAll('.kr-item').forEach(item => {
+      const weekCountEl = item.querySelector('.kr-week');
+      const monthCountEl = item.querySelector('.kr-month');
+      if (!weekCountEl || !monthCountEl) return;
+
+      const weekCount = parseInt(weekCountEl.textContent.trim(), 10) || 0;
+      const monthCount = parseInt(monthCountEl.textContent.trim(), 10) || 0;
+
+      // ✅ 퍼센트 계산: ‘오늘까지’ 분모 사용 → 서버(StatsServiceImpl)와 일치
+      const weekPct  = Math.max(0, Math.min(100, Math.round((weekCount  / weekDenom ) * 100)));
+      const monthPct = Math.max(0, Math.min(100, Math.round((monthCount / monthDenom) * 100)));
+
+      const weekGraph = item.querySelector('.mini-graph[data-type="week"]');
+      if (weekGraph) {
+        const fill  = weekGraph.querySelector('.mini-fill');
+        const pctEl = weekGraph.querySelector('.mini-percent');
+        if (fill)  fill.style.width = weekPct + '%';
+        if (pctEl) pctEl.textContent = weekPct + '%';
+      }
+
+      const monthGraph = item.querySelector('.mini-graph[data-type="month"]');
+      if (monthGraph) {
+        const fill  = monthGraph.querySelector('.mini-fill');
+        const pctEl = monthGraph.querySelector('.mini-percent');
+        if (fill)  fill.style.width = monthPct + '%';
+        if (pctEl) pctEl.textContent = monthPct + '%';
+      }
+    });
+  })();
+</script>
 </body>
 </html>

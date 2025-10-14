@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.YearMonth;
+import java.time.ZoneId;
 import java.util.List;
 
 @Service
@@ -18,20 +19,22 @@ public class StatsServiceImpl implements StatsService {
 
     private final DailyCheckRepository dailyCheckRepository;
 
+    // ✅ [NEW] 모든 집계는 서울 타임존 ‘오늘’ 기준
+    private static final ZoneId ZONE = ZoneId.of("Asia/Seoul");
+
     // =======================
     // Public APIs (userId 필수)
     // =======================
 
     @Override
     public CompareStats weeklyStatsForKeyResult(Long krId, Long userId) {
-        // 이번 주 (월~일)
-        LocalDate today = LocalDate.now();
+        // ✅ 이번 주 (월~일), 분모는 ‘오늘까지’
+        LocalDate today = LocalDate.now(ZONE);
         LocalDate weekStart = today.with(DayOfWeek.MONDAY);
         LocalDate weekEnd   = today.with(DayOfWeek.SUNDAY);
 
-        // ♻️ 분모는 '오늘까지'로 제한 → 미래일 제외
         PeriodStats current  = buildKrPeriodStats(krId, userId, weekStart, min(weekEnd, today));
-        // 전주는 전체 주간 기간 고정
+        // 지난 주(월~일) 전체
         PeriodStats previous = buildKrPeriodStats(krId, userId, weekStart.minusWeeks(1), weekEnd.minusWeeks(1));
 
         return buildCompare(current, previous);
@@ -39,16 +42,14 @@ public class StatsServiceImpl implements StatsService {
 
     @Override
     public CompareStats monthlyStatsForKeyResult(Long krId, Long userId) {
-        // 이번 달 (1일~말일)
-        LocalDate today = LocalDate.now();
+        // ✅ 이번 달 (1~말), 분모는 ‘오늘까지’
+        LocalDate today = LocalDate.now(ZONE);
         YearMonth ym = YearMonth.from(today);
         LocalDate monthStart = ym.atDay(1);
         LocalDate monthEnd   = ym.atEndOfMonth();
 
-        // ♻️ 분모는 '오늘까지'로 제한
         PeriodStats current  = buildKrPeriodStats(krId, userId, monthStart, min(monthEnd, today));
-
-        // 지난달은 완전한 달(1~말일)
+        // 지난 달(1~말) 전체
         YearMonth prevYm = ym.minusMonths(1);
         PeriodStats previous = buildKrPeriodStats(krId, userId, prevYm.atDay(1), prevYm.atEndOfMonth());
 
@@ -57,7 +58,7 @@ public class StatsServiceImpl implements StatsService {
 
     @Override
     public CompareStats weeklyStatsForObjective(Long objectiveId, Long userId) {
-        LocalDate today = LocalDate.now();
+        LocalDate today = LocalDate.now(ZONE);
         LocalDate weekStart = today.with(DayOfWeek.MONDAY);
         LocalDate weekEnd   = today.with(DayOfWeek.SUNDAY);
 
@@ -69,35 +70,43 @@ public class StatsServiceImpl implements StatsService {
 
     @Override
     public CompareStats monthlyStatsForObjective(Long objectiveId, Long userId) {
-        LocalDate today = LocalDate.now();
+        LocalDate today = LocalDate.now(ZONE);
         YearMonth ym = YearMonth.from(today);
         LocalDate monthStart = ym.atDay(1);
         LocalDate monthEnd   = ym.atEndOfMonth();
 
         PeriodStats current  = buildObjectivePeriodStats(objectiveId, userId, monthStart, min(monthEnd, today));
-
         YearMonth prevYm = ym.minusMonths(1);
         PeriodStats previous = buildObjectivePeriodStats(objectiveId, userId, prevYm.atDay(1), prevYm.atEndOfMonth());
 
         return buildCompare(current, previous);
     }
 
+    // ✅ [NEW] streak(연속일): 오늘부터 과거로 연속 체크가 끊길 때까지 카운트
+    @Override
+    public int streakForKeyResult(Long krId, Long userId) {
+        LocalDate cursor = LocalDate.now(ZONE);
+        int streak = 0;
+        while (true) {
+            boolean exists = dailyCheckRepository.existsByKeyResultIdAndUserIdAndDate(krId, userId, cursor);
+            if (!exists) break;
+            streak++;
+            cursor = cursor.minusDays(1);
+        }
+        return streak;
+    }
+
     // =======================
     // Private Helpers (userId 버전만 유지)
     // =======================
 
-    /**
-     * KR 단위 기간 통계 (사용자 기준)
-     */
     private PeriodStats buildKrPeriodStats(Long krId, Long userId, LocalDate start, LocalDate end) {
         long totalDays = daysInclusive(start, end);
-        if (totalDays < 0) totalDays = 0; // 안전장치
+        if (totalDays < 0) totalDays = 0;
 
-        // ✅ 사용자 기준 체크 카운트
         long checked = (totalDays == 0) ? 0 :
                 dailyCheckRepository.countCheckedInRangeByKrAndUser(krId, userId, start, end);
 
-        // ✅ 스파크라인용 체크 날짜들
         List<LocalDate> checkedDates =
                 dailyCheckRepository.findCheckedDatesInRangeByKrAndUser(krId, userId, start, end);
 
@@ -107,16 +116,12 @@ public class StatsServiceImpl implements StatsService {
                 .start(start)
                 .end(end)
                 .checkedDays(checked)
-                .totalDays(totalDays)
+                .totalDays(totalDays) // ✅ 프런트 분모(퍼센트)와 동일하게 ‘오늘까지’ 반영됨
                 .rate(rate)
                 .checkedDates(checkedDates)
                 .build();
     }
 
-    /**
-     * Objective 단위 기간 통계 (사용자 기준, 여러 KR 합산)
-     * - checkedDates는 필요시 null (목표 단위에선 일자별 점 필요 없으면)
-     */
     private PeriodStats buildObjectivePeriodStats(Long objectiveId, Long userId, LocalDate start, LocalDate end) {
         long totalDays = daysInclusive(start, end);
         if (totalDays < 0) totalDays = 0;
@@ -136,9 +141,6 @@ public class StatsServiceImpl implements StatsService {
                 .build();
     }
 
-    /**
-     * 전/현 기간 비교 결과 빌드
-     */
     private CompareStats buildCompare(PeriodStats current, PeriodStats previous) {
         int delta = current.getRate() - previous.getRate(); // 증감(퍼센트 포인트)
         return CompareStats.builder()
@@ -147,10 +149,6 @@ public class StatsServiceImpl implements StatsService {
                 .delta(delta)
                 .build();
     }
-
-    // =======================
-    // Small Utilities
-    // =======================
 
     private static LocalDate min(LocalDate a, LocalDate b) {
         return (a.isBefore(b)) ? a : b;

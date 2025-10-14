@@ -14,4 +14,5 @@ public interface ObjectiveService {
     void deleteById(Long id);
     void updateObjective(Long id, ObjectiveForm form, User loginUser);
     List<ObjectiveResponse> findObjectiveResponsesByUser(User user);
+    void deleteObjective(Long objectiveId, User loginUser);
 }
