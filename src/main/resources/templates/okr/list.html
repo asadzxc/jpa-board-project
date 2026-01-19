@@ -36,7 +36,11 @@
     <div style="display:flex; align-items:center; justify-content:space-between;">
       <div>
         <h2 th:text="${objective.title}" style="margin:0;">Objective 제목</h2>
-        <span th:text="${objective.dDay}" style="margin-left: 10px; font-weight: bold; color: darkgreen;"></span>
+
+        <span th:text="|D-day ${-objective.quarterRemain}|"
+        style="margin-left: 10px; font-weight: bold; color: darkgreen;"></span>
+
+
       </div>
 
       <!-- ✅ Objective 삭제 버튼 -->

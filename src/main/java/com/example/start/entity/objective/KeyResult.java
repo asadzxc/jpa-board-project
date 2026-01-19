@@ -5,6 +5,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -26,6 +27,10 @@ public class KeyResult {
     @Column(nullable = false)
     private Integer weight;
 
+    // ✅ [NEW] 90일 분기 D-Day 기준 시작일
+    @Column(nullable = false)
+    private LocalDate quarterStartDate;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "objective_id", nullable = false)
     private Objective objective;
@@ -40,5 +45,7 @@ public class KeyResult {
         if (weight == null) weight = 1;      // 기본값 보장
         if (content == null) content = "";
         if (progress < 0) progress = 0;
+        // ✅ [NEW] 시작일이 없으면 "오늘"로 자동 세팅
+        if (quarterStartDate == null) quarterStartDate = LocalDate.now();
     }
 }

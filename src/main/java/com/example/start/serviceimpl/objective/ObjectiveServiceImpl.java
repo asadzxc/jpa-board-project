@@ -14,6 +14,8 @@ import com.example.start.service.objective.StatsService;        // ✅ [NEW]
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import com.example.start.util.QuarterDdayCalculator;
+import java.time.LocalDate;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -113,7 +115,12 @@ public class ObjectiveServiceImpl implements ObjectiveService {
         for (Objective objective : objectives) {
             List<KeyResultResponse> keyResultResponses = new ArrayList<>();
 
+
             for (KeyResult kr : objective.getKeyResults()) {
+
+
+
+
                 boolean checkedToday = dailyCheckService.isCheckedToday(kr.getId(), user);
 
                 // ✅ [NEW] 동일 집계 로직으로 리스트 값 채우기 (세부 보기와 100% 일치)
@@ -130,7 +137,17 @@ public class ObjectiveServiceImpl implements ObjectiveService {
                 keyResultResponses.add(dto);
             }
 
-            responses.add(new ObjectiveResponse(objective, keyResultResponses));
+            LocalDate base;
+            if (objective.getStartDate() != null) {
+                base = objective.getStartDate().toLocalDate();
+            } else if (objective.getCreatedDate() != null) {
+                base = objective.getCreatedDate().toLocalDate();
+            } else {
+                base = LocalDate.now();
+            }
+
+            int quarterRemain = QuarterDdayCalculator.calc(base).remain();
+            responses.add(new ObjectiveResponse(objective, keyResultResponses, quarterRemain));
         }
         return responses;
     }

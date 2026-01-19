@@ -12,6 +12,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import com.example.start.service.objective.DailyCheckService;
+import com.example.start.dto.objective.KeyResultMonthCalendarResponse;
+
+
 
 import java.time.*;
 import java.time.temporal.TemporalAdjusters;
@@ -139,5 +142,30 @@ public class DailyCheckServiceImpl implements DailyCheckService {
             cur = cur.minusDays(1);
         }
         return streak;
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public KeyResultMonthCalendarResponse getMonthCalendar(Long keyResultId, User loginUser, YearMonth ym) {
+        if (loginUser == null) {
+            throw new IllegalStateException("로그인이 필요합니다.");
+        }
+
+        // KR 존재 검증(네 getThisWeekDetail이랑 같은 패턴)
+        KeyResult kr = keyResultRepository.findById(keyResultId)
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 핵심 결과입니다."));
+
+        LocalDate start = ym.atDay(1);
+        LocalDate end = ym.atEndOfMonth();
+
+        // ✅ 너 Repository에 이미 있음: findCheckedDatesInRangeByKrAndUser :contentReference[oaicite:1]{index=1}
+        List<String> checkedDates = dailyCheckRepository
+                .findCheckedDatesInRangeByKrAndUser(keyResultId, loginUser.getId(), start, end)
+                .stream()
+                .map(LocalDate::toString) // "yyyy-MM-dd"
+                .distinct()
+                .collect(Collectors.toList());
+
+        return new KeyResultMonthCalendarResponse(kr.getId(), ym.toString(), checkedDates);
     }
 }

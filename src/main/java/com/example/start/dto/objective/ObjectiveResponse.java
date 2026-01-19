@@ -14,14 +14,19 @@ public class ObjectiveResponse {
     private String description;
     private String dDay;
     private List<KeyResultResponse> keyResults;
+    private int quarterRemain;
 
-    // ✅ 생성자
+    // ✅ 기존 생성자 유지(필요하면)
     public ObjectiveResponse(Objective objective, List<KeyResultResponse> keyResults) {
+        this(objective, keyResults, 0);
+    }
+
+    // ✅ NEW: quarterRemain까지 받는 생성자
+    public ObjectiveResponse(Objective objective, List<KeyResultResponse> keyResults, int quarterRemain) {
         this.id = objective.getId();
         this.title = objective.getTitle();
         this.description = objective.getDescription();
 
-        // ✅ LocalDateTime -> LocalDate 변환해서 전달
         LocalDate baseDate = null;
         if (objective.getEndDate() != null) {
             baseDate = objective.getEndDate().toLocalDate();
@@ -33,7 +38,10 @@ public class ObjectiveResponse {
 
         this.dDay = (baseDate != null) ? calculateDDay(baseDate) : "-";
         this.keyResults = keyResults;
+
+        this.quarterRemain = quarterRemain; // ✅ 여기!
     }
+
 
     // ✅ 오늘 기준 D-day 문자열 계산: D-3 / D-Day / D+2
     private String calculateDDay(LocalDate targetDate) {
