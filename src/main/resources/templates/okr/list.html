@@ -124,6 +124,7 @@
 
   <a href="/"><button>메인으로</button></a>
   <a href="/okr/create" style="margin-left: 10px;"><button>새 OKR 작성하기</button></a>
+  <a href="/okr/archive" style="margin-left: 10px;"><button>보관함</button></a>
 
   <div th:each="objective : ${objectives}"
        class="obj"
@@ -194,6 +195,15 @@
 
 
       </div>
+
+      <!-- ✅ 보관하기 버튼 -->
+      <form th:action="@{/okr/{id}/archive(id=${objective.id})}" method="post"
+            onsubmit="return confirm('이 Objective를 보관함으로 옮길까요?');">
+        <button type="submit" class="toggle-btn"
+                style="background:#111827; color:#fff; border-color:#111827;">
+          보관하기
+        </button>
+      </form>
 
       <!-- ✅ Objective 삭제 버튼 -->
       <form th:action="@{/okr/{id}/delete(id=${objective.id})}" method="post"

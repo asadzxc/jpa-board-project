@@ -9,9 +9,9 @@ import lombok.Setter;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.temporal.TemporalAdjusters;
-import java.util.ArrayList;                 // [NEW]
+import java.util.ArrayList;
 import java.util.LinkedHashSet;
-import java.util.List;                     // [NEW]
+import java.util.List;
 import java.util.Set;
 
 @Getter @Setter
@@ -21,6 +21,9 @@ public class KeyResultWeekDetailResponse {
     // ===== 기본 식별/표시 =====
     private Long keyResultId;
     private String keyResultContent;
+
+    // [NEW] 같은 OKR의 다른 KR 목록을 가져오기 위한 Objective id
+    private Long objectiveId;
 
     // ===== 기준 날짜/주간 범위 =====
     private LocalDate refDate;
@@ -43,6 +46,12 @@ public class KeyResultWeekDetailResponse {
         this.keyResultContent = kr.getContent();
         this.refDate = today;
 
+        // ✅✅✅ [CHANGED] objectiveId 세팅 추가 (드롭다운에 필요한 핵심 값)
+        if (kr.getObjective() != null) {
+            this.objectiveId = kr.getObjective().getId();
+        }
+        // ✅✅✅ [CHANGED] 끝
+
         this.weekStart = startOfWeek(today);
         this.weekEnd   = endOfWeek(today);
 
@@ -63,14 +72,12 @@ public class KeyResultWeekDetailResponse {
         return d.with(TemporalAdjusters.nextOrSame(DayOfWeek.SUNDAY));
     }
 
-    // ===== 여기부터 추가 =====
-
     /**
      * [NEW] 템플릿에서 사용하는 detail.days
      * 주(weekStart ~ weekEnd) 날짜를 월~일 순으로 반환합니다.
      * 필드가 없어도 게터만 있으면 SpEL에서 'days' 프로퍼티로 인식됩니다.
      */
-    public List<LocalDate> getDays() {                     // [NEW]
+    public List<LocalDate> getDays() {
         LocalDate start = (weekStart != null) ? weekStart
                 : startOfWeek(refDate != null ? refDate : LocalDate.now());
         LocalDate end   = (weekEnd != null) ? weekEnd
@@ -83,11 +90,7 @@ public class KeyResultWeekDetailResponse {
         return days;
     }
 
-    /**
-     * [NEW] 템플릿에서 '#lists.contains(detail.checkedDays, d)'로도 가능하지만,
-     * 필요 시 메서드로도 사용할 수 있게 헬퍼 제공.
-     */
-    public boolean isCheckedOn(LocalDate date) {           // [NEW] (선택 사용)
+    public boolean isCheckedOn(LocalDate date) {
         return checkedDays != null && checkedDays.contains(date);
     }
 }

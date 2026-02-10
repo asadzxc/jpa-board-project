@@ -13,6 +13,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import com.example.start.enums.ObjectiveStatus;
+
 
 import java.util.List;
 
@@ -29,7 +31,8 @@ public class ObjectiveController {
         User loginUser = (User) session.getAttribute("loginUser");
         if (loginUser == null) return "redirect:/login";
 
-        List<ObjectiveResponse> objectives = objectiveService.findObjectiveResponsesByUser(loginUser);
+        List<ObjectiveResponse> objectives =
+                objectiveService.findObjectiveResponsesByUserAndStatus(loginUser, ObjectiveStatus.ACTIVE);
         model.addAttribute("objectives", objectives);
         return "okr/list";
     }
@@ -107,4 +110,39 @@ public class ObjectiveController {
         // return "redirect:/okr/kr/" + keyResultId;
         return "redirect:/okr";
     }
+
+    // ✅ 보관함 목록
+    @GetMapping("/archive")
+    public String archiveList(Model model, HttpSession session) {
+        User loginUser = (User) session.getAttribute("loginUser");
+        if (loginUser == null) return "redirect:/login";
+
+        // 방법 A(추천): 서비스에 status 필터 메서드 만들고 사용
+        List<ObjectiveResponse> archived = objectiveService
+                .findObjectiveResponsesByUserAndStatus(loginUser, ObjectiveStatus.ARCHIVED);
+
+        model.addAttribute("objectives", archived);
+        return "okr/archive";
+    }
+
+    // ✅ 보관하기
+    @PostMapping("/{id}/archive")
+    public String archive(@PathVariable Long id, HttpSession session) {
+        User loginUser = (User) session.getAttribute("loginUser");
+        if (loginUser == null) return "redirect:/login";
+
+        objectiveService.archiveObjective(id, loginUser);
+        return "redirect:/okr";
+    }
+
+    // ✅ 복원하기
+    @PostMapping("/{id}/restore")
+    public String restore(@PathVariable Long id, HttpSession session) {
+        User loginUser = (User) session.getAttribute("loginUser");
+        if (loginUser == null) return "redirect:/login";
+
+        objectiveService.restoreObjective(id, loginUser);
+        return "redirect:/okr/archive";
+    }
+
 }

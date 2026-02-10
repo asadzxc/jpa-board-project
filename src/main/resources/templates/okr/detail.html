@@ -44,7 +44,11 @@
     /* =========================
        [NEW] 주/월 보기 탭
        ========================= */
-    .viewTabs { display:flex; gap:8px; margin: 12px 0 8px; }
+    /* ✅✅✅ [CHANGED] 좌(탭) / 우(드롭다운) 정렬 */
+    .viewTabs { display:flex; align-items:center; justify-content:space-between; gap:12px; margin: 12px 0 8px; }
+    .tabLeft { display:flex; gap:8px; }
+    /* ✅✅✅ [CHANGED] 끝 */
+
     .tabBtn {
       border:1px solid var(--border); background:#fff; padding:8px 12px;
       border-radius: 999px; cursor:pointer; font-weight:600;
@@ -52,6 +56,18 @@
     .tabBtn.active { background: var(--text); color:#fff; border-color: var(--text); }
     .viewBox { margin-top: 10px; }
     .hidden { display:none; }
+
+    /* ✅✅✅ [CHANGED] 드롭다운 UI 스타일 */
+    .krJump { display:flex; align-items:center; gap:8px; }
+    .krSelect{
+      border:1px solid var(--border);
+      background:#fff;
+      padding:8px 12px;
+      border-radius:999px;
+      font-weight:600;
+      max-width: 280px;
+    }
+    /* ✅✅✅ [CHANGED] 끝 */
 
     /* =========================
        [NEW] 월 달력
@@ -77,6 +93,17 @@
       border-radius:12px; pointer-events:none;
     }
     .calCell.today { outline: 2px solid #111827; outline-offset: 0px; }
+
+    /* a 링크(이전/다음)도 버튼처럼: 파란색/밑줄 제거 + 폰트/색 통일 */
+a.tabBtn, a.tabBtn:visited, a.tabBtn:hover, a.tabBtn:active {
+  color: inherit;
+  text-decoration: none;
+}
+
+/* 버튼/셀렉트/링크 폰트 통일 */
+.tabBtn, .btn, .krSelect {
+  font: inherit;
+}
   </style>
 </head>
 
@@ -97,11 +124,35 @@
     </span>
   </div>
 
-  <!-- [NEW] 주/월 보기 탭 -->
+  <!-- ✅✅✅ [CHANGED] 주/월 보기 탭 + (오른쪽) 다른 KR 드롭다운 -->
   <div class="viewTabs">
-    <button type="button" class="tabBtn active" id="tabWeek">주 보기</button>
-    <button type="button" class="tabBtn" id="tabMonth">월 보기</button>
+    <div class="tabLeft">
+      <button type="button" class="tabBtn active" id="tabWeek">주 보기</button>
+      <button type="button" class="tabBtn" id="tabMonth">월 보기</button>
+    </div>
+
+    <div class="krJump" th:if="${krOptions != null}">
+      <form th:action="@{/okr/kr/go}" method="get" style="display:flex; gap:8px; align-items:center;">
+        <select class="krSelect" name="id" id="krSelect">
+          <option th:each="kr : ${krOptions}"
+                  th:value="${kr.id}"
+                  th:selected="${kr.id == detail.keyResultId}"
+                  th:text="${#strings.abbreviate(kr.content, 24)}">
+            KR 내용
+          </option>
+        </select>
+        <button type="submit" class="tabBtn">다른 KR 보기</button>
+
+        <!-- ✅ [NEW] 이전/다음 -->
+        <a th:if="${prevKrId != null}" th:href="@{/okr/kr/go(id=${prevKrId})}" class="tabBtn">이전</a>
+        <span th:if="${prevKrId == null}" class="tabBtn" style="opacity:.35; pointer-events:none;">이전</span>
+
+        <a th:if="${nextKrId != null}" th:href="@{/okr/kr/go(id=${nextKrId})}" class="tabBtn">다음</a>
+        <span th:if="${nextKrId == null}" class="tabBtn" style="opacity:.35; pointer-events:none;">다음</span>
+      </form>
+    </div>
   </div>
+  <!-- ✅✅✅ [CHANGED] 끝 -->
 
   <!-- =========================
        주 보기(기존 화면 그대로)
@@ -117,7 +168,6 @@
     </div>
 
     <div class="bars">
-      <!-- 참고: class 기본값은 'bar', 체크된 날에는 done 클래스만 append -->
       <div class="bar"
            th:each="d : ${detail.days}"
            th:classappend="${detail.checkedDays.contains(d)} ? ' done' : ''">
@@ -125,13 +175,9 @@
       </div>
     </div>
 
-    <!-- ============================================================
-         (기존 6번 추가) 주간 막대(.bars) 바로 아래에 '주/월 통계 카드' 섹션
-         ============================================================ -->
     <section id="stats" style="margin-top:16px;">
       <h3 style="margin:8px 0;">통계</h3>
 
-      <!-- 이번 주 카드 -->
       <div class="card" style="margin-bottom:12px;">
         <div class="kpi">
           <strong>이번 주 달성률</strong>
@@ -142,7 +188,6 @@
         <div id="week-spark" class="spark"></div>
       </div>
 
-      <!-- 이번 달 카드(요약) -->
       <div class="card">
         <div class="kpi">
           <strong>이번 달 달성률</strong>
@@ -168,8 +213,6 @@
 
         <input type="month" id="calPick" />
         <button type="button" id="calGo">이동</button>
-
-
       </div>
     </div>
 
@@ -191,17 +234,15 @@
   <p class="muted" style="margin-top:10px;">※ 오늘 날짜만 체크/해제가 가능합니다.</p>
 </div>
 
+<!-- ✅ JS는 기존 그대로 (변경 없음) -->
 <script th:inline="javascript">
   (function(){
-    // KR id 주입 (없으면 0)
     const krId = /*[[${detail.keyResultId}]]*/ 0;
 
-    // 오늘 날짜 문자열 (YYYY-MM-DD)
     const today = new Date();
     const yyyy = today.getFullYear(), mm = today.getMonth()+1, dd = today.getDate();
     const todayStr = `${yyyy}-${String(mm).padStart(2,'0')}-${String(dd).padStart(2,'0')}`;
 
-    // 공통 렌더 함수
     function setRate(rateId, barId, rate){
       const r = Math.max(0, Math.min(100, rate|0));
       document.getElementById(rateId).textContent = r + '%';
@@ -234,9 +275,6 @@
       return dot;
     }
 
-    // =========================
-    // (기존) 주간 통계 로드
-    // =========================
     fetch(`/okr/stats/kr/${krId}/week`)
       .then(r=>r.json())
       .then(data=>{
@@ -254,9 +292,6 @@
         });
       });
 
-    // =========================
-    // (기존) 월간 통계 로드(요약 카드)
-    // =========================
     fetch(`/okr/stats/kr/${krId}/month`)
       .then(r=>r.json())
       .then(data=>{
@@ -274,23 +309,17 @@
         });
       });
 
-      // =========================
-// [NEW] 분기(90일) D-Day 로드  (-90 ~ 0)
-// =========================
-fetch(`/okr/stats/kr/${krId}/quarter-dday`)
-  .then(r => r.json())
-  .then(data => {
-    const el = document.getElementById('qdday');
-    if (!el) return;
+    fetch(`/okr/stats/kr/${krId}/quarter-dday`)
+      .then(r => r.json())
+      .then(data => {
+        const el = document.getElementById('qdday');
+        if (!el) return;
 
-    const remain = Number(data.remain ?? 90);
-    el.textContent = String(-remain); // ✅ -90 ~ 0
-  })
-  .catch(console.error);
+        const remain = Number(data.remain ?? 90);
+        el.textContent = String(-remain);
+      })
+      .catch(console.error);
 
-    // =========================
-    // [NEW] 주/월 탭 전환
-    // =========================
     const tabWeek = document.getElementById('tabWeek');
     const tabMonth = document.getElementById('tabMonth');
     const weekView = document.getElementById('weekView');
@@ -309,155 +338,133 @@ fetch(`/okr/stats/kr/${krId}/quarter-dday`)
       loadCalendar();
     });
 
-    // =========================
-// [NEW] 월 달력 렌더링
-// =========================
-const calTitle = document.getElementById('calTitle');
-const calDowRow = document.getElementById('calDowRow');
-const calGrid = document.getElementById('calGrid');
-const calPrev = document.getElementById('calPrev');
-const calNext = document.getElementById('calNext');
-const calTodayBtn = document.getElementById('calToday');
+    const calTitle = document.getElementById('calTitle');
+    const calDowRow = document.getElementById('calDowRow');
+    const calGrid = document.getElementById('calGrid');
+    const calPrev = document.getElementById('calPrev');
+    const calNext = document.getElementById('calNext');
+    const calTodayBtn = document.getElementById('calToday');
 
-// ✅ [ADDED] 연/월 점프 UI 요소
-const calPick = document.getElementById('calPick');
-const calGo   = document.getElementById('calGo');
-// ✅ [ADDED] 연/월 점프 UI 요소 끝
+    const calPick = document.getElementById('calPick');
+    const calGo   = document.getElementById('calGo');
 
-const DOW = ['일','월','화','수','목','금','토'];
-let curY = yyyy;
-let curM = mm; // 1~12
+    const DOW = ['일','월','화','수','목','금','토'];
+    let curY = yyyy;
+    let curM = mm;
 
-// 요일 헤더는 1번만
-(function renderDow(){
-  calDowRow.innerHTML = '';
-  DOW.forEach(d=>{
-    const div = document.createElement('div');
-    div.className = 'calDow';
-    div.textContent = d;
-    calDowRow.appendChild(div);
-  });
-})();
+    (function renderDow(){
+      calDowRow.innerHTML = '';
+      DOW.forEach(d=>{
+        const div = document.createElement('div');
+        div.className = 'calDow';
+        div.textContent = d;
+        calDowRow.appendChild(div);
+      });
+    })();
 
-function ymParam(y, m){
-  return `${y}-${String(m).padStart(2,'0')}`; // yyyy-MM
-}
-function daysInMonth(y, m){
-  return new Date(y, m, 0).getDate(); // m=1~12
-}
-function fmtYMD(y,m,d){
-  return `${y}-${String(m).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
-}
-
-// ✅ [ADDED] picker(input type="month")를 현재 달(curY/curM)과 동기화
-function syncPicker(){
-  if (!calPick) return;
-  calPick.value = ymParam(curY, curM); // "YYYY-MM"
-}
-// ✅ [ADDED] picker 동기화 끝
-
-// ✅ [ADDED] '이동' 버튼 / month input 변경 이벤트
-if (calGo) {
-  calGo.addEventListener('click', () => {
-    const v = calPick?.value; // "YYYY-MM"
-    if (!v) return;
-
-    const [y, m] = v.split('-').map(Number);
-    if (!y || !m) return;
-
-    curY = y;
-    curM = m;
-    loadCalendar(); // 선택한 월로 점프
-  });
-}
-
-
-
-function renderCalendarGrid(y, m, checkedSet){
-  calTitle.textContent = `${y}.${String(m).padStart(2,'0')}`;
-  calGrid.innerHTML = '';
-
-  const firstDow = new Date(y, m-1, 1).getDay();
-  const thisMonthDays = daysInMonth(y, m);
-
-  const prevM = (m===1) ? 12 : (m-1);
-  const prevY = (m===1) ? (y-1) : y;
-  const prevDays = daysInMonth(prevY, prevM);
-
-  for(let idx=0; idx<42; idx++){
-    const cell = document.createElement('div');
-    cell.className = 'calCell';
-
-    let cy=y, cm=m, cd=1;
-
-    if (idx < firstDow){
-      cell.classList.add('out');
-      cd = prevDays - (firstDow-1-idx);
-      cy = prevY; cm = prevM;
-    } else if (idx >= firstDow + thisMonthDays){
-      cell.classList.add('out');
-      cd = idx - (firstDow + thisMonthDays) + 1;
-      const nextM = (m===12) ? 1 : (m+1);
-      const nextY = (m===12) ? (y+1) : y;
-      cy = nextY; cm = nextM;
-    } else {
-      cd = idx - firstDow + 1;
+    function ymParam(y, m){
+      return `${y}-${String(m).padStart(2,'0')}`;
+    }
+    function daysInMonth(y, m){
+      return new Date(y, m, 0).getDate();
+    }
+    function fmtYMD(y,m,d){
+      return `${y}-${String(m).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
     }
 
-    const dateStr = fmtYMD(cy, cm, cd);
+    function syncPicker(){
+      if (!calPick) return;
+      calPick.value = ymParam(curY, curM);
+    }
 
-    if (checkedSet.has(dateStr)) cell.classList.add('done');
-    if (dateStr === todayStr) cell.classList.add('today');
+    if (calGo) {
+      calGo.addEventListener('click', () => {
+        const v = calPick?.value;
+        if (!v) return;
 
-    const dayNum = document.createElement('div');
-    dayNum.className = 'dayNum';
-    dayNum.textContent = cd;
+        const [y, m] = v.split('-').map(Number);
+        if (!y || !m) return;
 
-    cell.appendChild(dayNum);
-    calGrid.appendChild(cell);
-  }
-}
+        curY = y;
+        curM = m;
+        loadCalendar();
+      });
+    }
 
-// =========================
-// [NEW] 서버에서 "해당 월 체크 날짜들" 가져오기
-// =========================
-function loadCalendar(){
-  // ✅ [ADDED] ◀/▶/이번달/이동 어떤 방식이든 input이 현재 월을 따라오게
-  syncPicker();
-  // ✅ [ADDED] 끝
+    function renderCalendarGrid(y, m, checkedSet){
+      calTitle.textContent = `${y}.${String(m).padStart(2,'0')}`;
+      calGrid.innerHTML = '';
 
-  const ym = ymParam(curY, curM);
-  fetch(`/okr/stats/kr/${krId}/calendar?ym=${encodeURIComponent(ym)}`)
-    .then(r=>r.json())
-    .then(data=>{
-      const checkedSet = new Set((data.checkedDates || []).map(String));
-      renderCalendarGrid(curY, curM, checkedSet);
+      const firstDow = new Date(y, m-1, 1).getDay();
+      const thisMonthDays = daysInMonth(y, m);
+
+      const prevM = (m===1) ? 12 : (m-1);
+      const prevY = (m===1) ? (y-1) : y;
+      const prevDays = daysInMonth(prevY, prevM);
+
+      for(let idx=0; idx<42; idx++){
+        const cell = document.createElement('div');
+        cell.className = 'calCell';
+
+        let cy=y, cm=m, cd=1;
+
+        if (idx < firstDow){
+          cell.classList.add('out');
+          cd = prevDays - (firstDow-1-idx);
+          cy = prevY; cm = prevM;
+        } else if (idx >= firstDow + thisMonthDays){
+          cell.classList.add('out');
+          cd = idx - (firstDow + thisMonthDays) + 1;
+          const nextM = (m===12) ? 1 : (m+1);
+          const nextY = (m===12) ? (y+1) : y;
+          cy = nextY; cm = nextM;
+        } else {
+          cd = idx - firstDow + 1;
+        }
+
+        const dateStr = fmtYMD(cy, cm, cd);
+
+        if (checkedSet.has(dateStr)) cell.classList.add('done');
+        if (dateStr === todayStr) cell.classList.add('today');
+
+        const dayNum = document.createElement('div');
+        dayNum.className = 'dayNum';
+        dayNum.textContent = cd;
+
+        cell.appendChild(dayNum);
+        calGrid.appendChild(cell);
+      }
+    }
+
+    function loadCalendar(){
+      syncPicker();
+      const ym = ymParam(curY, curM);
+      fetch(`/okr/stats/kr/${krId}/calendar?ym=${encodeURIComponent(ym)}`)
+        .then(r=>r.json())
+        .then(data=>{
+          const checkedSet = new Set((data.checkedDates || []).map(String));
+          renderCalendarGrid(curY, curM, checkedSet);
+        });
+    }
+
+    calPrev.addEventListener('click', ()=>{
+      curM -= 1;
+      if (curM === 0){ curM = 12; curY -= 1; }
+      loadCalendar();
     });
-}
+    calNext.addEventListener('click', ()=>{
+      curM += 1;
+      if (curM === 13){ curM = 1; curY += 1; }
+      loadCalendar();
+    });
+    calTodayBtn.addEventListener('click', ()=>{
+      curY = yyyy; curM = mm;
+      loadCalendar();
+    });
 
-calPrev.addEventListener('click', ()=>{
-  curM -= 1;
-  if (curM === 0){ curM = 12; curY -= 1; }
-  loadCalendar();
-});
-calNext.addEventListener('click', ()=>{
-  curM += 1;
-  if (curM === 13){ curM = 1; curY += 1; }
-  loadCalendar();
-});
-calTodayBtn.addEventListener('click', ()=>{
-  curY = yyyy; curM = mm;
-  loadCalendar();
-});
-
-// ✅ [ADDED] 최초 진입 시에도 picker 세팅(초기 로딩 때 UI가 비어있지 않게)
-syncPicker();
-// ✅ [ADDED] 끝
-
-// (참고) 네 페이지가 "월간 탭을 눌렀을 때 loadCalendar()"를 호출하는 구조라면 여기서 또 호출 안 해도 됨.
-// 만약 최초 진입 시 달력이 안 뜬다면 아래 한 줄을 켜면 됨.
-// loadCalendar();
+    syncPicker();
   })();
 </script>
 </body>
 </html>
+

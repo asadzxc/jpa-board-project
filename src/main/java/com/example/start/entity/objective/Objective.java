@@ -1,6 +1,7 @@
 package com.example.start.entity.objective;
 
 import com.example.start.entity.post.User;
+import com.example.start.enums.ObjectiveStatus;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -10,6 +11,7 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.List;
+
 
 @Entity
 @Getter @Setter
@@ -27,6 +29,13 @@ public class Objective {
 
     private LocalDateTime startDate;
     private LocalDateTime endDate;
+
+    // ✅ [NEW] 보관함 상태/시각
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private ObjectiveStatus status = ObjectiveStatus.ACTIVE;
+
+    private LocalDateTime archivedAt; // 보관한 시각(선택)
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)

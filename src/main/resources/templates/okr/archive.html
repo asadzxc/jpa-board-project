@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="ko">
+<head>
+  <meta charset="UTF-8"/>
+  <title>OKR 보관함</title>
+</head>
+<body>
+
+<h1>보관함(지난 OKR)</h1>
+
+<a th:href="@{/okr}">← 진행중 OKR로</a>
+
+<div th:if="${#lists.isEmpty(objectives)}" style="margin-top:16px;">
+  보관된 OKR이 없습니다.
+</div>
+
+<div th:each="obj : ${objectives}" style="border:1px solid #ddd; padding:12px; margin-top:12px;">
+  <h3 th:text="${obj.title}">Objective Title</h3>
+  <p th:text="${obj.description}">desc</p>
+
+  <!-- 통계/퍼센트가 ObjectiveResponse에 있으면 여기서 그대로 보여도 됨 -->
+  <div>
+    분기 진행률: <span th:text="${obj.quarterProgressPercent}">0</span>%
+    / 달성률: <span th:text="${obj.achievementPercent}">0</span>%
+  </div>
+
+  <form th:action="@{/okr/{id}/restore(id=${obj.id})}" method="post" style="margin-top:8px;">
+    <button type="submit">복원하기</button>
+  </form>
+</div>
+
+</body>
+</html>
