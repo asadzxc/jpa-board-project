@@ -3,25 +3,37 @@
 <head>
     <meta charset="UTF-8">
     <title>로그인</title>
+    <link rel="stylesheet" th:href="@{/css/base.css?v=20260303}">
+    <link rel="stylesheet" th:href="@{/css/components.css?v=20260303}">
+    <link rel="stylesheet" th:href="@{/css/theme-forest.css?v=20260303}">
+    <link rel="stylesheet" th:href="@{/css/pages/auth.css?v=20260303}">
 </head>
-<body>
-<h1>로그인</h1>
 
-<form th:action="@{/login}" method="post">
-    <label for="username">아이디:</label>
-    <input type="text" id="username" name="username" required><br>
+<body class="theme-forest">
+<div class="auth-wrap">
+    <div class="card auth-card">
+        <h1 class="card-title">로그인</h1>
+        <p class="card-subtitle">아이디와 비밀번호를 입력해주세요</p>
 
-    <label for="password">비밀번호:</label>
-    <input type="password" id="password" name="password" required><br>
+        <form th:action="@{/login}" method="post" class="form">
+            <div class="form-row">
+                <label for="username">아이디</label>
+                <input type="text" id="username" name="username" required>
+            </div>
 
-    <button type="submit">로그인</button>
-</form>
+            <div class="form-row">
+                <label for="password">비밀번호</label>
+                <input type="password" id="password" name="password" required>
+            </div>
 
-<!-- 회원가입 페이지 링크 -->
-<p>아직 회원이 아니신가요? <a th:href="@{/signup}">회원가입</a></p>
+            <div class="row mt12">
+                <button type="submit" class="btn primary">로그인</button>
+                <a class="right" th:href="@{/signup}">회원가입</a>
+            </div>
+        </form>
 
-<!-- 로그인 실패 시 메시지 -->
-<p th:if="${error}" th:text="${error}" style="color:red;"></p>
-
+        <p class="error" th:if="${error}" th:text="${error}"></p>
+    </div>
+</div>
 </body>
 </html>

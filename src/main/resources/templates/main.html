@@ -1,29 +1,61 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org" lang="ko">
 <head>
   <meta charset="UTF-8">
   <title>Main</title>
+
+  <link rel="stylesheet" th:href="@{/css/base.css?v=20260303}">
+  <link rel="stylesheet" th:href="@{/css/components.css?v=20260303}">
+  <link rel="stylesheet" th:href="@{/css/theme-forest.css?v=20260303}">
+  <link rel="stylesheet" th:href="@{/css/pages/main.css?v=20260303}">
 </head>
-<body>
 
-<h1>메인 페이지</h1>
+<body class="theme-forest page-main">
 
-<!-- 로그인 성공 시 사용자 이름 표시 -->
-<div th:if="${session.loginUser != null}">
-  <p th:text="${session.loginUser.name} + '님, 환영합니다!'"></p>
-  <a href="/logout">로그아웃</a>
-  <a href="/posts/new">글쓰기</a>
-  <a href="/posts">글 목록</a>
-  <a href="/okr">내 OKR 보기</a>
-</div>
+<section class="hero hero-min">
+  <div class="hero-inner">
+    <div class="time" id="clock">--:--</div>
 
+    <!-- 로그인 상태 -->
+    <div class="greeting" th:if="${session.loginUser != null}">
+      <span th:text="'Enjoy the present moment, ' + ${session.loginUser.name} + '!'">Welcome</span>
+    </div>
 
+    <!-- 비로그인 상태 -->
+    <div class="greeting" th:if="${session.loginUser == null}">
+      Enjoy the present moment.
+    </div>
 
-<!-- 로그인하지 않은 경우 -->
-<div th:if="${session.loginUser == null}">
-  <a href="/login">로그인</a> |
-  <a href="/signup">회원가입</a>
-</div>
+    <!-- ✅ 비로그인: 로그인/회원가입 -->
+    <div class="hero-actions" th:if="${session.loginUser == null}">
+      <a class="btn primary" th:href="@{/login}">로그인</a>
+      <a class="btn" th:href="@{/signup}">회원가입</a>
+    </div>
+
+    <!-- ✅ 로그인: 모든 기능 버튼 -->
+    <div class="hero-actions" th:if="${session.loginUser != null}">
+      <a class="btn primary" th:href="@{/okr}">내 OKR 보기</a>
+      <a class="btn" th:href="@{/posts/new}">글쓰기</a>
+      <a class="btn" th:href="@{/posts}">글 목록</a>
+      <a class="btn danger" th:href="@{/logout}">로그아웃</a>
+    </div>
+
+  </div>
+</section>
+
+<script>
+  (function () {
+    const clock = document.getElementById('clock');
+    function tick() {
+      const now = new Date();
+      const hh = String(now.getHours()).padStart(2, '0');
+      const mm = String(now.getMinutes()).padStart(2, '0');
+      clock.textContent = `${hh}:${mm}`;
+    }
+    tick();
+    setInterval(tick, 10000);
+  })();
+</script>
 
 </body>
 </html>

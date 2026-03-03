@@ -1,0 +1,36 @@
+/* ===== BASE ===== */
+*{ box-sizing:border-box; }
+
+html, body{ height:100%; }
+
+body{
+  margin:0;
+  font-family: system-ui, -apple-system, Segoe UI, Roboto, "Noto Sans KR", Arial, sans-serif;
+  letter-spacing: .1px;
+}
+
+a{ text-decoration:none; }
+a:hover{ text-decoration: underline; }
+
+hr{
+  border:0;
+  border-top:1px solid rgba(0,0,0,.08);
+  margin: 16px 0;
+}
+
+/* 공통 컨테이너 */
+.container{
+  width: min(1100px, 92vw);
+  margin: 28px auto;
+  padding: 0 0 28px;
+}
+
+/* 유틸 */
+.row{ display:flex; gap:10px; align-items:center; flex-wrap:wrap; }
+.right{ margin-left:auto; }
+.mt8{ margin-top:8px; }
+.mt12{ margin-top:12px; }
+.mt16{ margin-top:16px; }
+.mb8{ margin-bottom:8px; }
+.mb12{ margin-bottom:12px; }
+.center{ text-align:center; }
