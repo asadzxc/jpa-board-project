@@ -87,3 +87,15 @@
   text-decoration: none;
   filter: brightness(0.95);
 }
+
+.hint{
+  margin-top: 4px;
+  font-size: 13px;
+  color: rgba(0,0,0,.6);
+}
+
+.form-row div {
+  padding: 10px 12px;
+  background: rgba(255,255,255,.6);
+  border-radius: 8px;
+}

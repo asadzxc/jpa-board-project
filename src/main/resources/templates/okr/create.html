@@ -1,58 +1,87 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org" lang="ko">
 <head>
     <meta charset="UTF-8">
     <title>OKR 만들기</title>
+
+    <!-- ✅ 공통(숲/유리 테마) -->
+    <link rel="stylesheet" th:href="@{/css/base.css}">
+    <link rel="stylesheet" th:href="@{/css/components.css}">
+    <link rel="stylesheet" th:href="@{/css/theme-forest.css}">
+
+    <!-- ✅ 이 페이지 전용 -->
+    <link rel="stylesheet" th:href="@{/css/pages/create.css}">
+
     <script>
         let krCount = 3;
 
         function addKeyResult() {
-            if (krCount >= 5) return;
+          if (krCount >= 5) return;
 
-            const container = document.getElementById("keyResultContainer");
+          const container = document.getElementById("keyResultContainer");
 
-            const div = document.createElement("div");
-            div.className = "kr-input";
+          const div = document.createElement("div");
+          div.className = "kr-input";
 
-            div.innerHTML = `
-                <input type="text" name="keyResults[${krCount}].content" placeholder="핵심 결과 ${krCount + 1}" required />
-                <button type="button" onclick="removeKeyResult(this)">삭제</button>
-            `;
+          div.innerHTML = `
+            <input type="text" name="keyResults[${krCount}].content" placeholder="핵심 결과 ${krCount + 1}" required />
+            <button type="button" onclick="removeKeyResult(this)" class="btnDanger">삭제</button>
+          `;
 
-            container.appendChild(div);
-            krCount++;
+          container.appendChild(div);
+          krCount++;
         }
 
         function removeKeyResult(button) {
-            const div = button.parentElement;
-            div.remove();
-            krCount--;
+          const div = button.parentElement;
+          div.remove();
+          krCount--;
         }
     </script>
 </head>
-<body>
-<h1>🎯 새로운 OKR 만들기</h1>
 
-<form th:action="@{/okr/create}" method="post">
-    <label>목표 제목:</label><br>
-    <input type="text" name="title" placeholder="예: 블로그 방문자 2배로 늘리기" required><br><br>
+<body class="page-okr-create">
+<div class="container">
+    <h1>🎯 새로운 OKR 만들기</h1>
 
-    <label>목표 설명:</label><br>
-    <textarea name="description" rows="3" cols="40" placeholder="목표에 대한 설명을 입력하세요"></textarea><br><br>
+    <form th:action="@{/okr/create}" method="post" class="createForm">
+        <div class="field">
+            <label>목표 제목</label>
+            <input type="text" name="title" placeholder="예: 블로그 방문자 2배로 늘리기" required>
+        </div>
 
+        <div class="field">
+            <label>목표 설명</label>
+            <textarea name="description" rows="3" placeholder="목표에 대한 설명을 입력하세요"></textarea>
+        </div>
 
+        <div class="field krSection">
+            <label>핵심 결과 (최소 3개, 최대 5개)</label>
+            <div class="hint">최소 3개는 필수, 최대 5개까지 추가할 수 있어요.</div>
 
-    <label>핵심 결과 (최소 3개, 최대 5개):</label>
-    <div id="keyResultContainer">
-        <div><input type="text" name="keyResults[0].content" placeholder="핵심 결과 1" required></div>
-        <div><input type="text" name="keyResults[1].content" placeholder="핵심 결과 2" required></div>
-        <div><input type="text" name="keyResults[2].content" placeholder="핵심 결과 3" required></div>
-    </div>
+            <div id="keyResultContainer" class="krList">
+                <div class="kr-input">
+                    <input type="text" name="keyResults[0].content" placeholder="핵심 결과 1" required>
+                    <span class="ghostBtn" aria-hidden="true">필수</span>
+                </div>
+                <div class="kr-input">
+                    <input type="text" name="keyResults[1].content" placeholder="핵심 결과 2" required>
+                    <span class="ghostBtn" aria-hidden="true">필수</span>
+                </div>
+                <div class="kr-input">
+                    <input type="text" name="keyResults[2].content" placeholder="핵심 결과 3" required>
+                    <span class="ghostBtn" aria-hidden="true">필수</span>
+                </div>
+            </div>
 
-    <button type="button" onclick="addKeyResult()">➕ 핵심 결과 추가</button>
-    <br><br>
+            <button type="button" onclick="addKeyResult()" class="btnAdd">➕ 핵심 결과 추가</button>
+        </div>
 
-    <button type="submit">✅ 목표 등록</button>
-</form>
+        <div class="actions">
+            <button type="submit" class="btnPrimary">✅ 목표 등록</button>
+            <a th:href="@{/okr}" class="btn">OKR 목록으로</a>
+        </div>
+    </form>
+</div>
 </body>
 </html>

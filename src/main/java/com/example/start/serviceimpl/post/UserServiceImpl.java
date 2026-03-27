@@ -4,13 +4,17 @@ import com.example.start.entity.post.User;
 import com.example.start.repository.post.UserRepository;
 import com.example.start.service.post.UserService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+
 import java.util.List;
 
 @Service
 @RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
+
     private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
 
     @Override
     public User register(User user) {
@@ -18,7 +22,31 @@ public class UserServiceImpl implements UserService {
                 .ifPresent(u -> {
                     throw new IllegalStateException("이미 존재하는 사용자명입니다.");
                 });
+
+        validatePassword(user.getPassword());
+
+        // 비밀번호 암호화
+        user.setPassword(passwordEncoder.encode(user.getPassword()));
+
         return userRepository.save(user);
+    }
+
+    private void validatePassword(String password) {
+        if (password == null || password.isBlank()) {
+            throw new IllegalArgumentException("비밀번호를 입력해주세요.");
+        }
+
+        if (password.length() < 8) {
+            throw new IllegalArgumentException("비밀번호는 8자 이상이어야 합니다.");
+        }
+
+        if (!password.matches(".*[A-Za-z].*")) {
+            throw new IllegalArgumentException("비밀번호에는 영문이 1개 이상 포함되어야 합니다.");
+        }
+
+        if (!password.matches(".*\\d.*")) {
+            throw new IllegalArgumentException("비밀번호에는 숫자가 1개 이상 포함되어야 합니다.");
+        }
     }
 
     @Override
@@ -32,8 +60,6 @@ public class UserServiceImpl implements UserService {
         return userRepository.findByUsername(username).orElse(null);
     }
 
-
-    // 관리자 페이지용 메서드
     @Override
     public List<User> findAll() {
         return userRepository.findAll();
@@ -48,7 +74,4 @@ public class UserServiceImpl implements UserService {
     public long count() {
         return userRepository.count();
     }
-
-
-
 }

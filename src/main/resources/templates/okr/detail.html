@@ -3,161 +3,75 @@
 <head>
   <meta charset="UTF-8"/>
   <title>KR 세부</title>
-  <style>
-    :root {
-      --border:#e5e7eb; --bg:#f9fafb; --muted:#6b7280; --ok:#10b981; --text:#111827;
-    }
-    body { font-family: system-ui, sans-serif; background: var(--bg); color: var(--text); margin: 0; }
-    .wrap { max-width: 840px; margin: 40px auto; background: #fff; border:1px solid var(--border); border-radius: 16px; padding: 24px; }
-    .title { font-size: 20px; font-weight: 700; margin: 0 0 8px; }
-    .sub { color: var(--muted); margin-bottom: 16px; }
 
-    .stats { display:flex; align-items:center; justify-content: space-between; margin: 16px 0 24px; }
-    .percent { font-size: 28px; font-weight: 800; }
-    .range { color: var(--muted); }
-
-    .bars { display:grid; grid-template-columns: repeat(7, 1fr); gap: 8px; }
-    .bar {
-      height: 120px; border:1px solid var(--border); border-radius: 12px;
-      display:flex; align-items:flex-end; justify-content:center;
-      background: #fff; position: relative; overflow: hidden;
-    }
-    .bar::after { content:""; width:100%; height:0%; position:absolute; bottom:0; left:0; background: var(--ok); transition: height .2s ease; }
-    .bar.done::after { height:100%; }
-    .label { position:absolute; bottom:6px; font-size:12px; background:#fff; padding: 2px 6px; border-radius: 8px; border:1px solid var(--border); }
-
-    .actions { margin-top: 24px; display:flex; gap:12px; }
-    .btn { border:1px solid var(--border); padding:10px 14px; border-radius: 12px; cursor: pointer; background:#fff; }
-    .btn.ok { background: var(--ok); color:#fff; border-color: var(--ok); }
-    .muted { color: var(--muted); font-size: 13px; }
-
-    /* 통계 카드(기존 6번 추가) */
-    .card { border:1px solid var(--border); border-radius:12px; padding:12px; }
-    .kpi { display:flex; justify-content:space-between; align-items:center; }
-    .barline { height:10px; background:#e5e7eb; border-radius:8px; margin-top:8px; }
-    .barfill { height:10px; width:0%; background: var(--ok); border-radius:8px; transition: width .2s ease; }
-    .spark { display:flex; gap:6px; margin-top:8px; flex-wrap:wrap; }
-    .dot { width:14px; height:14px; border-radius:4px; border:1px solid var(--border); background:#e5e7eb; }
-    .dot.today { border:2px solid #111827; }
-    .delta { margin-top:8px; font-size:12px; color: var(--muted); }
-
-    /* =========================
-       [NEW] 주/월 보기 탭
-       ========================= */
-    /* ✅✅✅ [CHANGED] 좌(탭) / 우(드롭다운) 정렬 */
-    .viewTabs { display:flex; align-items:center; justify-content:space-between; gap:12px; margin: 12px 0 8px; }
-    .tabLeft { display:flex; gap:8px; }
-    /* ✅✅✅ [CHANGED] 끝 */
-
-    .tabBtn {
-      border:1px solid var(--border); background:#fff; padding:8px 12px;
-      border-radius: 999px; cursor:pointer; font-weight:600;
-    }
-    .tabBtn.active { background: var(--text); color:#fff; border-color: var(--text); }
-    .viewBox { margin-top: 10px; }
-    .hidden { display:none; }
-
-    /* ✅✅✅ [CHANGED] 드롭다운 UI 스타일 */
-    .krJump { display:flex; align-items:center; gap:8px; }
-    .krSelect{
-      border:1px solid var(--border);
-      background:#fff;
-      padding:8px 12px;
-      border-radius:999px;
-      font-weight:600;
-      max-width: 280px;
-    }
-    /* ✅✅✅ [CHANGED] 끝 */
-
-    /* =========================
-       [NEW] 월 달력
-       ========================= */
-    .calHeader { display:flex; align-items:center; justify-content:space-between; gap:12px; margin: 10px 0; }
-    .calTitle { font-size: 16px; font-weight: 800; }
-    .calNav { display:flex; gap:8px; }
-    .calNav .btn { padding:8px 10px; border-radius: 10px; }
-
-    .calGrid { display:grid; grid-template-columns: repeat(7, 1fr); gap:8px; }
-    .calDow { font-size:12px; color:var(--muted); text-align:center; padding:6px 0; }
-
-    .calCell {
-      border:1px solid var(--border); border-radius:12px; background:#fff;
-      height: 78px; padding:8px; position:relative;
-      display:flex; flex-direction:column; gap:6px;
-    }
-    .calCell.out { background:#f3f4f6; color:#9ca3af; }
-    .calCell .dayNum { font-weight:800; font-size:13px; }
-    .calCell.done { border-color: var(--ok); }
-    .calCell.done::after {
-      content:""; position:absolute; inset:0; background: rgba(16,185,129,.14);
-      border-radius:12px; pointer-events:none;
-    }
-    .calCell.today { outline: 2px solid #111827; outline-offset: 0px; }
-
-    /* a 링크(이전/다음)도 버튼처럼: 파란색/밑줄 제거 + 폰트/색 통일 */
-a.tabBtn, a.tabBtn:visited, a.tabBtn:hover, a.tabBtn:active {
-  color: inherit;
-  text-decoration: none;
-}
-
-/* 버튼/셀렉트/링크 폰트 통일 */
-.tabBtn, .btn, .krSelect {
-  font: inherit;
-}
-  </style>
+  <link rel="stylesheet" th:href="@{/css/base.css}">
+  <link rel="stylesheet" th:href="@{/css/components.css}">
+  <link rel="stylesheet" th:href="@{/css/theme-forest.css}">
+  <link rel="stylesheet" th:href="@{/css/pages/okr-detail.css}">
 </head>
 
-<body>
+<body class="page-okr okr-detail">
 <div class="wrap">
+
   <h1 class="title" th:text="${detail.keyResultContent}">핵심 결과 내용</h1>
 
   <div class="sub">
-    <span style="font-weight:800; color:var(--ok);">D-Day </span>
-    <span id="qdday" style="font-weight:800; color:var(--ok);">--</span>
+    <span class="ddayLabel">D-Day</span>
+    <span class="ddayValue"
+         >D-0</span>
   </div>
 
   <div class="sub">
-    <!-- 주 보기일 때 의미가 있는 주간 범위 -->
     <span class="range"
           th:text="|${#temporals.format(detail.weekStart,'MM.dd')} ~ ${#temporals.format(detail.weekEnd,'MM.dd')}|">
       09.08 ~ 09.14
     </span>
   </div>
 
-  <!-- ✅✅✅ [CHANGED] 주/월 보기 탭 + (오른쪽) 다른 KR 드롭다운 -->
+  <!-- 다른 KR 이동 -->
   <div class="viewTabs">
     <div class="tabLeft">
-      <button type="button" class="tabBtn active" id="tabWeek">주 보기</button>
-      <button type="button" class="tabBtn" id="tabMonth">월 보기</button>
+      <span class="tabBtn active">주/월 진행 상황</span>
     </div>
 
     <div class="krJump" th:if="${krOptions != null}">
-      <form th:action="@{/okr/kr/go}" method="get" style="display:flex; gap:8px; align-items:center;">
-        <select class="krSelect" name="id" id="krSelect">
-          <option th:each="kr : ${krOptions}"
-                  th:value="${kr.id}"
-                  th:selected="${kr.id == detail.keyResultId}"
-                  th:text="${#strings.abbreviate(kr.content, 24)}">
-            KR 내용
-          </option>
-        </select>
+
+      <!-- 1) 드롭다운 이동 전용 form -->
+      <form th:action="@{/okr/kr/go}" method="get" class="kr-jump-form">
+        <span class="selectWrap">
+          <select class="krSelect" name="id" id="krSelect">
+            <option th:each="kr : ${krOptions}"
+                    th:value="${kr.id}"
+                    th:selected="${kr.id == detail.keyResultId}"
+                    th:text="${#strings.abbreviate(kr.content, 24)}">
+              KR 내용
+            </option>
+          </select>
+        </span>
+
         <button type="submit" class="tabBtn">다른 KR 보기</button>
-
-        <!-- ✅ [NEW] 이전/다음 -->
-        <a th:if="${prevKrId != null}" th:href="@{/okr/kr/go(id=${prevKrId})}" class="tabBtn">이전</a>
-        <span th:if="${prevKrId == null}" class="tabBtn" style="opacity:.35; pointer-events:none;">이전</span>
-
-        <a th:if="${nextKrId != null}" th:href="@{/okr/kr/go(id=${nextKrId})}" class="tabBtn">다음</a>
-        <span th:if="${nextKrId == null}" class="tabBtn" style="opacity:.35; pointer-events:none;">다음</span>
       </form>
+
+      <!-- 2) 이전 / 다음 이동 전용 -->
+      <div class="krNav">
+        <a th:if="${prevKrId != null}"
+           th:href="@{/okr/kr/go(id=${prevKrId})}"
+           class="tabBtn">이전</a>
+        <span th:if="${prevKrId == null}"
+              class="tabBtn disabled-tab">이전</span>
+
+        <a th:if="${nextKrId != null}"
+           th:href="@{/okr/kr/go(id=${nextKrId})}"
+           class="tabBtn">다음</a>
+        <span th:if="${nextKrId == null}"
+              class="tabBtn disabled-tab">다음</span>
+      </div>
+
     </div>
   </div>
-  <!-- ✅✅✅ [CHANGED] 끝 -->
 
-  <!-- =========================
-       주 보기(기존 화면 그대로)
-       ========================= -->
-  <div id="weekView" class="viewBox">
+  <!-- 주간 보기만 사용 -->
+  <div class="viewBox">
     <div class="stats">
       <div class="percent">
         <span th:text="${detail.percent}">0</span>% 달성
@@ -178,293 +92,112 @@ a.tabBtn, a.tabBtn:visited, a.tabBtn:hover, a.tabBtn:active {
     <section id="stats" style="margin-top:16px;">
       <h3 style="margin:8px 0;">통계</h3>
 
-      <div class="card" style="margin-bottom:12px;">
+      <div class="kcard">
         <div class="kpi">
           <strong>이번 주 달성률</strong>
-          <span id="week-rate">--%</span>
+          <span th:text="|${detail.percent}%|">0%</span>
         </div>
-        <div class="barline"><div id="week-bar" class="barfill"></div></div>
-        <div class="delta">지난 주 대비 <span id="week-delta">--</span>%</div>
-        <div id="week-spark" class="spark"></div>
-      </div>
 
-      <div class="card">
-        <div class="kpi">
-          <strong>이번 달 달성률</strong>
-          <span id="month-rate">--%</span>
+        <div class="barline">
+          <div class="barfill"
+               th:style="|width:${detail.percent}%;|"></div>
         </div>
-        <div class="barline"><div id="month-bar" class="barfill"></div></div>
-        <div class="delta">지난 달 대비 <span id="month-delta">--</span>%</div>
-        <div id="month-spark" class="spark"></div>
+
+        <div class="delta">
+          이번 주 체크:
+          <span th:text="|${detail.checkedCount}일|">0일</span>
+        </div>
       </div>
     </section>
   </div>
 
-  <!-- =========================
-       월 보기(달력)
-       ========================= -->
-  <div id="monthView" class="viewBox hidden">
-    <div class="calHeader">
-      <div class="calTitle" id="calTitle">YYYY.MM</div>
-      <div class="calNav">
-        <button type="button" class="btn" id="calPrev">◀</button>
-        <button type="button" class="btn" id="calToday">이번 달</button>
-        <button type="button" class="btn" id="calNext">▶</button>
+  <!-- ===== 월 달력 ===== -->
+  <div class="monthCard" th:if="${monthDetail != null}">
 
-        <input type="month" id="calPick" />
-        <button type="button" id="calGo">이동</button>
+    <div class="monthHead">
+      <h3 class="monthTitle">
+        <span th:text="${monthDetail.year}">2026</span>년
+        <span th:text="${monthDetail.month}">3</span>월
+      </h3>
+
+      <div class="monthNav">
+        <a class="btn"
+           th:href="@{/okr/kr/{id}(id=${detail.keyResultId}, year=${monthDetail.prevYear}, month=${monthDetail.prevMonth})}">
+          ← 이전달
+        </a>
+        <a class="btn"
+           th:href="@{/okr/kr/{id}(id=${detail.keyResultId}, year=${monthDetail.nextYear}, month=${monthDetail.nextMonth})}">
+          다음달 →
+        </a>
       </div>
     </div>
 
-    <div class="calGrid" id="calDowRow"></div>
-    <div class="calGrid" id="calGrid"></div>
+    <!-- 요일 헤더 -->
+    <div class="monthWeekdays">
+      <div>일</div>
+      <div>월</div>
+      <div>화</div>
+      <div>수</div>
+      <div>목</div>
+      <div>금</div>
+      <div>토</div>
+    </div>
 
-    <p class="muted" style="margin-top:10px;">
-      ※ 초록 배경 = 체크한 날 / 테두리 강조 = 오늘
-    </p>
+    <!-- 달력 본문 -->
+    <div class="monthRows">
+      <div class="monthRow" th:each="week : ${monthDetail.weeks}">
+
+        <th:block th:each="cell : ${week}">
+
+          <!-- 이전달/다음달 -->
+          <div th:if="${!cell.currentMonth}"
+               class="monthCell otherMonth">
+            <div class="monthDay" th:text="${cell.dayOfMonth}">1</div>
+          </div>
+
+          <!-- 현재달 + 오늘 + 체크 -->
+          <div th:if="${cell.currentMonth and cell.today and cell.checked}"
+               class="monthCell today checked">
+            <div class="monthDay" th:text="${cell.dayOfMonth}">1</div>
+            <div class="checkDot"></div>
+          </div>
+
+          <!-- 현재달 + 오늘 -->
+          <div th:if="${cell.currentMonth and cell.today and !cell.checked}"
+               class="monthCell today">
+            <div class="monthDay" th:text="${cell.dayOfMonth}">1</div>
+            <div class="checkDot"></div>
+          </div>
+
+          <!-- 현재달 + 체크 -->
+          <div th:if="${cell.currentMonth and !cell.today and cell.checked}"
+               class="monthCell checked">
+            <div class="monthDay" th:text="${cell.dayOfMonth}">1</div>
+          </div>
+
+          <!-- 현재달 + 일반 날짜 -->
+          <div th:if="${cell.currentMonth and !cell.today and !cell.checked}"
+               class="monthCell">
+            <div class="monthDay" th:text="${cell.dayOfMonth}">1</div>
+          </div>
+
+        </th:block>
+
+      </div>
+    </div>
   </div>
 
+  <!-- 하단 버튼 -->
   <div class="actions">
     <form th:action="@{/okr/kr/{id}/toggle-today(id=${detail.keyResultId})}" method="post">
       <button type="submit" class="btn ok">오늘 체크/해제</button>
     </form>
+
     <a th:href="@{/okr}" class="btn">OKR 목록으로</a>
   </div>
 
   <p class="muted" style="margin-top:10px;">※ 오늘 날짜만 체크/해제가 가능합니다.</p>
+
 </div>
-
-<!-- ✅ JS는 기존 그대로 (변경 없음) -->
-<script th:inline="javascript">
-  (function(){
-    const krId = /*[[${detail.keyResultId}]]*/ 0;
-
-    const today = new Date();
-    const yyyy = today.getFullYear(), mm = today.getMonth()+1, dd = today.getDate();
-    const todayStr = `${yyyy}-${String(mm).padStart(2,'0')}-${String(dd).padStart(2,'0')}`;
-
-    function setRate(rateId, barId, rate){
-      const r = Math.max(0, Math.min(100, rate|0));
-      document.getElementById(rateId).textContent = r + '%';
-      document.getElementById(barId).style.width = r + '%';
-    }
-    function setDelta(deltaId, delta){
-      const d = delta|0;
-      const sign = d>0 ? '+' : '';
-      document.getElementById(deltaId).textContent = sign + d;
-    }
-    function toStr(date){
-      const y = date.getFullYear();
-      const m = String(date.getMonth()+1).padStart(2,'0');
-      const d = String(date.getDate()).padStart(2,'0');
-      return `${y}-${m}-${d}`;
-    }
-    function eachDate(start, end, cb){
-      const cur = new Date(start);
-      while(cur <= end){
-        cb(new Date(cur));
-        cur.setDate(cur.getDate()+1);
-      }
-    }
-    function makeDot(dateStr, checkedSet){
-      const dot = document.createElement('span');
-      dot.className = 'dot';
-      if(checkedSet.has(dateStr)) dot.style.background = 'var(--ok)';
-      if(dateStr === todayStr) dot.classList.add('today');
-      dot.title = dateStr + (checkedSet.has(dateStr) ? ' ✅' : '');
-      return dot;
-    }
-
-    fetch(`/okr/stats/kr/${krId}/week`)
-      .then(r=>r.json())
-      .then(data=>{
-        const cur = data.current || {};
-        setRate('week-rate','week-bar', cur.rate || 0);
-        setDelta('week-delta', data.delta || 0);
-
-        const spark = document.getElementById('week-spark');
-        spark.innerHTML = '';
-        const start = new Date(cur.start);
-        const end   = new Date(cur.end);
-        const checkedSet = new Set((cur.checkedDates||[]).map(String));
-        eachDate(start, end, (d)=>{
-          spark.appendChild(makeDot(toStr(d), checkedSet));
-        });
-      });
-
-    fetch(`/okr/stats/kr/${krId}/month`)
-      .then(r=>r.json())
-      .then(data=>{
-        const cur = data.current || {};
-        setRate('month-rate','month-bar', cur.rate || 0);
-        setDelta('month-delta', data.delta || 0);
-
-        const spark = document.getElementById('month-spark');
-        spark.innerHTML = '';
-        const start = new Date(cur.start);
-        const end   = new Date(cur.end);
-        const checkedSet = new Set((cur.checkedDates||[]).map(String));
-        eachDate(start, end, (d)=>{
-          spark.appendChild(makeDot(toStr(d), checkedSet));
-        });
-      });
-
-    fetch(`/okr/stats/kr/${krId}/quarter-dday`)
-      .then(r => r.json())
-      .then(data => {
-        const el = document.getElementById('qdday');
-        if (!el) return;
-
-        const remain = Number(data.remain ?? 90);
-        el.textContent = String(-remain);
-      })
-      .catch(console.error);
-
-    const tabWeek = document.getElementById('tabWeek');
-    const tabMonth = document.getElementById('tabMonth');
-    const weekView = document.getElementById('weekView');
-    const monthView = document.getElementById('monthView');
-
-    function setActiveTab(isMonth){
-      tabWeek.classList.toggle('active', !isMonth);
-      tabMonth.classList.toggle('active', isMonth);
-      weekView.classList.toggle('hidden', isMonth);
-      monthView.classList.toggle('hidden', !isMonth);
-    }
-
-    tabWeek.addEventListener('click', ()=> setActiveTab(false));
-    tabMonth.addEventListener('click', ()=>{
-      setActiveTab(true);
-      loadCalendar();
-    });
-
-    const calTitle = document.getElementById('calTitle');
-    const calDowRow = document.getElementById('calDowRow');
-    const calGrid = document.getElementById('calGrid');
-    const calPrev = document.getElementById('calPrev');
-    const calNext = document.getElementById('calNext');
-    const calTodayBtn = document.getElementById('calToday');
-
-    const calPick = document.getElementById('calPick');
-    const calGo   = document.getElementById('calGo');
-
-    const DOW = ['일','월','화','수','목','금','토'];
-    let curY = yyyy;
-    let curM = mm;
-
-    (function renderDow(){
-      calDowRow.innerHTML = '';
-      DOW.forEach(d=>{
-        const div = document.createElement('div');
-        div.className = 'calDow';
-        div.textContent = d;
-        calDowRow.appendChild(div);
-      });
-    })();
-
-    function ymParam(y, m){
-      return `${y}-${String(m).padStart(2,'0')}`;
-    }
-    function daysInMonth(y, m){
-      return new Date(y, m, 0).getDate();
-    }
-    function fmtYMD(y,m,d){
-      return `${y}-${String(m).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
-    }
-
-    function syncPicker(){
-      if (!calPick) return;
-      calPick.value = ymParam(curY, curM);
-    }
-
-    if (calGo) {
-      calGo.addEventListener('click', () => {
-        const v = calPick?.value;
-        if (!v) return;
-
-        const [y, m] = v.split('-').map(Number);
-        if (!y || !m) return;
-
-        curY = y;
-        curM = m;
-        loadCalendar();
-      });
-    }
-
-    function renderCalendarGrid(y, m, checkedSet){
-      calTitle.textContent = `${y}.${String(m).padStart(2,'0')}`;
-      calGrid.innerHTML = '';
-
-      const firstDow = new Date(y, m-1, 1).getDay();
-      const thisMonthDays = daysInMonth(y, m);
-
-      const prevM = (m===1) ? 12 : (m-1);
-      const prevY = (m===1) ? (y-1) : y;
-      const prevDays = daysInMonth(prevY, prevM);
-
-      for(let idx=0; idx<42; idx++){
-        const cell = document.createElement('div');
-        cell.className = 'calCell';
-
-        let cy=y, cm=m, cd=1;
-
-        if (idx < firstDow){
-          cell.classList.add('out');
-          cd = prevDays - (firstDow-1-idx);
-          cy = prevY; cm = prevM;
-        } else if (idx >= firstDow + thisMonthDays){
-          cell.classList.add('out');
-          cd = idx - (firstDow + thisMonthDays) + 1;
-          const nextM = (m===12) ? 1 : (m+1);
-          const nextY = (m===12) ? (y+1) : y;
-          cy = nextY; cm = nextM;
-        } else {
-          cd = idx - firstDow + 1;
-        }
-
-        const dateStr = fmtYMD(cy, cm, cd);
-
-        if (checkedSet.has(dateStr)) cell.classList.add('done');
-        if (dateStr === todayStr) cell.classList.add('today');
-
-        const dayNum = document.createElement('div');
-        dayNum.className = 'dayNum';
-        dayNum.textContent = cd;
-
-        cell.appendChild(dayNum);
-        calGrid.appendChild(cell);
-      }
-    }
-
-    function loadCalendar(){
-      syncPicker();
-      const ym = ymParam(curY, curM);
-      fetch(`/okr/stats/kr/${krId}/calendar?ym=${encodeURIComponent(ym)}`)
-        .then(r=>r.json())
-        .then(data=>{
-          const checkedSet = new Set((data.checkedDates || []).map(String));
-          renderCalendarGrid(curY, curM, checkedSet);
-        });
-    }
-
-    calPrev.addEventListener('click', ()=>{
-      curM -= 1;
-      if (curM === 0){ curM = 12; curY -= 1; }
-      loadCalendar();
-    });
-    calNext.addEventListener('click', ()=>{
-      curM += 1;
-      if (curM === 13){ curM = 1; curY += 1; }
-      loadCalendar();
-    });
-    calTodayBtn.addEventListener('click', ()=>{
-      curY = yyyy; curM = mm;
-      loadCalendar();
-    });
-
-    syncPicker();
-  })();
-</script>
 </body>
 </html>
-

@@ -1,0 +1,213 @@
+/* ===== OKR LIST PAGE ===== */
+
+/* 전체 폭/여백 */
+.page-okr .container{
+  width: min(980px, 92vw);
+  margin: 34px auto;
+}
+
+/* 페이지 헤더 */
+.page-okr .page-head{
+  display:flex;
+  align-items:flex-end;
+  justify-content:space-between;
+  gap:14px;
+  flex-wrap:wrap;
+  margin-bottom:16px;
+}
+
+.page-okr .page-title{
+  font-size: 34px;
+  letter-spacing: -0.6px;
+}
+
+.page-okr .page-actions{
+  display:flex;
+  gap:10px;
+  flex-wrap:wrap;
+}
+
+/* Objective 리스트 간격 */
+.page-okr .obj-list{
+  display:flex;
+  flex-direction:column;
+  gap:14px;
+}
+
+/* Objective 카드 상단: 좌(내용) / 우(버튼) */
+.page-okr .obj-top{
+  display:flex;
+  justify-content:space-between;
+  align-items:flex-start;
+  gap:16px;
+  flex-wrap:wrap;
+}
+
+.page-okr .obj-left{ flex: 1; min-width: 360px; }
+.page-okr .obj-right{
+  display:flex;
+  gap:10px;
+  flex-wrap:wrap;
+  align-items:flex-start;
+  justify-content:flex-end;
+}
+
+/* Objective 제목/설명 */
+.page-okr .obj-title{
+  font-size: 26px;
+  letter-spacing: -0.4px;
+  margin: 0 0 8px;
+}
+.page-okr .obj-desc{
+  margin: 10px 0 8px;
+  color: var(--muted-on-card, rgba(0,0,0,.6));
+  line-height: 1.6;
+}
+
+/* 진행/통계 박스가 텍스트 나열로 보이는 걸 “블록”으로 정리 */
+.page-okr .obj-progress{
+  margin-top: 10px;
+  padding: 12px 12px;
+  border-radius: 16px;
+  border: 1px solid rgba(8,32,24,.14);
+  background: rgba(255,255,255,.65);
+}
+
+.page-okr .obj-progress-top{
+  display:flex;
+  justify-content:space-between;
+  align-items:flex-start;
+  gap:12px;
+  flex-wrap:wrap;
+}
+
+.page-okr .obj-progress-title{
+  display:flex;
+  gap:10px;
+  align-items:baseline;
+}
+
+.page-okr .obj-progress-meta{
+  display:flex;
+  flex-direction:column;
+  gap:4px;
+  align-items:flex-end;
+  color: var(--muted-on-card, rgba(0,0,0,.6));
+  font-size: 13px;
+}
+
+.page-okr .obj-progress-bar{
+  margin-top: 10px;
+  height: 10px;
+  border-radius: 999px;
+  background: rgba(8,32,24,.10);
+  overflow: hidden;
+}
+.page-okr .obj-progress-fill{
+  height: 100%;
+  border-radius: 999px;
+  background: linear-gradient(90deg, var(--accent2, #06b6d4), var(--accent, #10b981));
+}
+
+/* 통계: 한 줄에 보기 좋게 */
+.page-okr .obj-stats{
+  margin-top: 10px;
+  display:flex;
+  flex-wrap:wrap;
+  gap: 8px 14px;
+  align-items:center;
+  font-size: 13px;
+  color: var(--muted-on-card, rgba(0,0,0,.6));
+}
+.page-okr .obj-stats .label{ font-weight: 800; color: rgba(0,0,0,.72); }
+.page-okr .obj-stats .value{ font-weight: 900; color: rgba(0,0,0,.92); }
+
+/* KR 추가 폼을 “한 덩어리”로 */
+.page-okr .kr-create{
+  margin: 12px 0 14px;
+  display:flex;
+  gap:8px;
+  flex-wrap:wrap;
+  align-items:center;
+
+  padding: 10px;
+  border-radius: 16px;
+  border: 1px dashed rgba(8,32,24,.18);
+  background: rgba(255,255,255,.55);
+}
+
+/* 네 HTML에 class="input input-sm"가 있어서, 작은 input 폭 지정 */
+
+
+/* KR 리스트 */
+.page-okr .kr-list{
+  list-style:none;
+  padding:0;
+  margin:0;
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+}
+
+.page-okr .kr-item{
+  border-radius: 16px;
+  border: 1px solid rgba(8,32,24,.14);
+  background: rgba(255,255,255,.72);
+  padding: 12px;
+}
+
+.page-okr .kr-item.is-checked{
+  background: rgba(16,185,129,.12);
+  box-shadow: 0 0 0 2px rgba(16,185,129,.22) inset;
+}
+
+.page-okr .kr-row{
+  display:flex;
+  justify-content:space-between;
+  gap:14px;
+  align-items:flex-start;
+  flex-wrap:wrap;
+}
+
+.page-okr .kr-main{ flex: 1; min-width: 320px; }
+
+.page-okr .kr-actions{
+  display:flex;
+  gap:8px;
+  flex-wrap:wrap;
+  align-items:center;
+  justify-content:flex-end;
+}
+
+/* 버튼 그룹이 들쭉날쭉하지 않게 */
+.page-okr .kr-actions .btn,
+.page-okr .kr-actions button{
+  white-space: nowrap;
+}
+
+/* ✅ D-Day pill 안 요소 간격( D-Day ↔ D-67 ) */
+.page-okr .pill{
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;   /* 6~10 사이로 취향껏 */
+}
+
+/* 미니 그래프 */
+.page-okr .mini-graphs{ display:flex; gap:10px; margin-top:8px; flex-wrap:wrap; }
+.page-okr .mini-graph{ display:flex; align-items:center; gap:6px; font-size:12px; color: var(--muted-on-card, rgba(0,0,0,.6)); }
+.page-okr .mini-label{ font-weight:800; }
+.page-okr .mini-bar{ width:78px; height:8px; background: rgba(8,32,24,.10); border-radius:999px; overflow:hidden; }
+.page-okr .mini-fill{ height:100%; width:0%; background: linear-gradient(90deg, var(--accent2,#06b6d4), var(--accent,#10b981)); transition: width .35s ease; }
+.page-okr .mini-percent{ min-width:34px; text-align:right; }
+
+/* 모바일 */
+@media (max-width: 640px){
+  .page-okr .obj-left{ min-width: 0; }
+  .page-okr .kr-main{ min-width: 0; }
+  .page-okr .page-title{ font-size: 28px; }
+}
+
+/* Forest 배경 위에서 OKR 페이지 텍스트는 카드 기준으로 */
+.page-okr.okr-list{
+  color: rgba(0,0,0,.92);
+}

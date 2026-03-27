@@ -7,21 +7,21 @@ import com.example.start.dto.objective.ObjectiveResponse;
 import com.example.start.entity.objective.KeyResult;
 import com.example.start.entity.objective.Objective;
 import com.example.start.entity.post.User;
+import com.example.start.enums.ObjectiveStatus;
 import com.example.start.repository.objective.DailyCheckRepository;
 import com.example.start.repository.objective.ObjectiveRepository;
 import com.example.start.service.objective.DailyCheckService;
 import com.example.start.service.objective.ObjectiveService;
 import com.example.start.service.objective.StatsService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import java.time.ZoneId;
-import com.example.start.enums.ObjectiveStatus;
-import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.time.LocalDateTime;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
@@ -70,7 +70,6 @@ public class ObjectiveServiceImpl implements ObjectiveService {
         Objective obj = objectiveRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 Objective 입니다."));
 
-        // 권한 체크(소유자 또는 관리자)
         if (loginUser != null) {
             Long ownerId = obj.getUser().getId();
             if (!ownerId.equals(loginUser.getId()) && !loginUser.isAdmin()) {
@@ -90,15 +89,15 @@ public class ObjectiveServiceImpl implements ObjectiveService {
     @Override
     @Transactional
     public void deleteById(Long id) {
-        // (컨트롤러/다른 메서드에서 권한 체크 후 호출한다고 가정)
         objectiveRepository.deleteById(id);
     }
 
-    // ✅ 권한 포함 버전 (컨트롤러에서 사용)
     @Override
     @Transactional
     public void deleteObjective(Long objectiveId, User loginUser) {
-        if (loginUser == null) throw new IllegalStateException("로그인이 필요합니다.");
+        if (loginUser == null) {
+            throw new IllegalStateException("로그인이 필요합니다.");
+        }
 
         Objective obj = objectiveRepository.findById(objectiveId)
                 .orElseThrow(() -> new IllegalArgumentException("Objective가 존재하지 않습니다."));
@@ -107,13 +106,16 @@ public class ObjectiveServiceImpl implements ObjectiveService {
         if (!ownerId.equals(loginUser.getId()) && !loginUser.isAdmin()) {
             throw new IllegalStateException("본인의 Objective만 삭제할 수 있습니다.");
         }
-        objectiveRepository.delete(obj); // cascade로 KR/DailyCheck까지 삭제
+
+        objectiveRepository.delete(obj);
     }
 
     @Override
     @Transactional
     public void archiveObjective(Long objectiveId, User loginUser) {
-        if (loginUser == null) throw new IllegalStateException("로그인이 필요합니다.");
+        if (loginUser == null) {
+            throw new IllegalStateException("로그인이 필요합니다.");
+        }
 
         Objective obj = objectiveRepository.findByIdAndUser_Id(objectiveId, loginUser.getId())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
@@ -125,7 +127,9 @@ public class ObjectiveServiceImpl implements ObjectiveService {
     @Override
     @Transactional
     public void restoreObjective(Long objectiveId, User loginUser) {
-        if (loginUser == null) throw new IllegalStateException("로그인이 필요합니다.");
+        if (loginUser == null) {
+            throw new IllegalStateException("로그인이 필요합니다.");
+        }
 
         Objective obj = objectiveRepository.findByIdAndUser_Id(objectiveId, loginUser.getId())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
@@ -134,7 +138,9 @@ public class ObjectiveServiceImpl implements ObjectiveService {
         obj.setArchivedAt(null);
     }
 
-    // ✅✅✅ 여기! (restoreObjective 끝난 직후, VIEW MODEL 섹션 들어가기 전에)
+    // ------------------------------------------------------------
+    // VIEW MODEL
+    // ------------------------------------------------------------
     @Override
     @Transactional(readOnly = true)
     public List<ObjectiveResponse> findObjectiveResponsesByUserAndStatus(User user, ObjectiveStatus status) {
@@ -146,10 +152,6 @@ public class ObjectiveServiceImpl implements ObjectiveService {
         return buildObjectiveResponses(objectives, user);
     }
 
-
-    // ------------------------------------------------------------
-    // VIEW MODEL for UI (Objective + KeyResultResponses)
-    // ------------------------------------------------------------
     @Override
     @Transactional(readOnly = true)
     public List<ObjectiveResponse> findObjectiveResponsesByUser(User user) {
@@ -184,20 +186,25 @@ public class ObjectiveServiceImpl implements ObjectiveService {
             // ==================================================
             // Objective 카드 통계 채우기 (주/월/분기 + 퍼센트)
             // ==================================================
-            LocalDate today = LocalDate.now();
+            LocalDate today = LocalDate.now(ZoneId.of("Asia/Seoul"));
 
-            // 이번주/이번달 범위
+            // 이번주 / 이번달 범위
             LocalDate weekStart = today.with(java.time.DayOfWeek.MONDAY);
             LocalDate weekEnd = today.with(java.time.DayOfWeek.SUNDAY);
 
             LocalDate monthStart = today.withDayOfMonth(1);
             LocalDate monthEnd = today.withDayOfMonth(today.lengthOfMonth());
 
-            // 분기 범위: "오늘이 속한 분기" 기준 + 90일 고정
-            LocalDate qStart = quarterStartByBase(today);
-            LocalDate qEnd = qStart.plusDays(89);
+            // 각 Objective 자신의 시작일 / 종료일 기준
+            LocalDate qStart = (objective.getStartDate() != null)
+                    ? objective.getStartDate().toLocalDate()
+                    : objective.getCreatedDate().toLocalDate();
 
-            // Objective 단위 체크 기록 수
+            LocalDate qEnd = (objective.getEndDate() != null)
+                    ? objective.getEndDate().toLocalDate()
+                    : qStart.plusDays(89);
+
+            // 체크 기록 수
             long weekChecks = dailyCheckRepository.countCheckedInRangeByObjectiveAndUser(
                     objective.getId(), user.getId(), weekStart, weekEnd);
 
@@ -214,21 +221,34 @@ public class ObjectiveServiceImpl implements ObjectiveService {
                     .filter(KeyResultResponse::isCheckedToday)
                     .count();
 
-            // 분기 진행률(90일 고정)
-            int totalDays = 90;
+            // 분기 진행률 (각 Objective 날짜 기준)
+            int totalDays = (int) ChronoUnit.DAYS.between(qStart, qEnd) + 1;
+            totalDays = Math.max(totalDays, 1);
 
-            int elapsedDays = (int) ChronoUnit.DAYS.between(qStart, today) + 1;
-            elapsedDays = Math.max(0, Math.min(totalDays, elapsedDays));
+            int elapsedDays;
+            if (today.isBefore(qStart)) {
+                elapsedDays = 0;
+            } else if (today.isAfter(qEnd)) {
+                elapsedDays = totalDays;
+            } else {
+                elapsedDays = (int) ChronoUnit.DAYS.between(qStart, today) + 1;
+            }
 
             int progressPercent = (int) Math.round(elapsedDays * 100.0 / totalDays);
             progressPercent = Math.max(0, Math.min(100, progressPercent));
 
             // 달성률(오늘까지): 실제 체크 / (경과일수 * KR개수)
             long possible = (long) elapsedDays * krCount;
-            int achievementPercent = (possible == 0) ? 0 : (int) Math.round(quarterChecks * 100.0 / possible);
+            int achievementPercent = (possible == 0)
+                    ? 0
+                    : (int) Math.round(quarterChecks * 100.0 / possible);
             achievementPercent = Math.max(0, Math.min(100, achievementPercent));
 
-            // resp에 세팅
+            // 남은 일수
+            int quarterRemain = (int) ChronoUnit.DAYS.between(today, qEnd);
+            quarterRemain = Math.max(0, quarterRemain);
+
+            // resp 세팅
             resp.setKrCount(krCount);
             resp.setTodayCheckedCount(todayCheckedCount);
 
@@ -241,21 +261,11 @@ public class ObjectiveServiceImpl implements ObjectiveService {
             resp.setQuarterProgressPercent(progressPercent);
 
             resp.setAchievementPercent(achievementPercent);
-
-            // 분기 종료일까지 남은 일수
-            resp.setQuarterRemain((int) ChronoUnit.DAYS.between(today, qEnd));
+            resp.setQuarterRemain(quarterRemain);
 
             responses.add(resp);
         }
 
         return responses;
-    }
-
-
-    // ✅ base가 속한 분기의 시작일(1/4/7/10월 1일)
-    private LocalDate quarterStartByBase(LocalDate base) {
-        int q = (base.getMonthValue() - 1) / 3; // 0~3
-        int startMonth = q * 3 + 1;            // 1,4,7,10
-        return LocalDate.of(base.getYear(), startMonth, 1);
     }
 }

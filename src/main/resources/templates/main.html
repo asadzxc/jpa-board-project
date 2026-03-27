@@ -35,8 +35,7 @@
     <!-- ✅ 로그인: 모든 기능 버튼 -->
     <div class="hero-actions" th:if="${session.loginUser != null}">
       <a class="btn primary" th:href="@{/okr}">내 OKR 보기</a>
-      <a class="btn" th:href="@{/posts/new}">글쓰기</a>
-      <a class="btn" th:href="@{/posts}">글 목록</a>
+      <a class="btn" th:href="@{/users/{id}(id=${session.loginUser.id})}">내 정보</a>
       <a class="btn danger" th:href="@{/logout}">로그아웃</a>
     </div>
 

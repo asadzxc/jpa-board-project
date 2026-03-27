@@ -1,56 +1,75 @@
 package com.example.start.controller.post;
 
-
 import com.example.start.entity.post.User;
 import com.example.start.service.post.UserService;
+import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
-import jakarta.servlet.http.HttpSession;
 
 @Controller
 @RequiredArgsConstructor
 public class UserController {
+
     private final UserService userService;
+    private final PasswordEncoder passwordEncoder;
 
-
-
-    //  회원가입 폼 보여주기
+    // 회원가입 폼
     @GetMapping("/signup")
     public String showSignupForm(Model model) {
         model.addAttribute("user", new User());
         return "signup";
     }
 
-
-    //  회원가입 처리
+    // 회원가입 처리
     @PostMapping("/signup")
     public String signup(@ModelAttribute User user,
-                         RedirectAttributes ra) {
-        // 회원 저장 후, 저장된 User 객체를 반환받음
-        User savedUser = userService.register(user);
+                         Model model,
+                         HttpSession session) {
+        try {
+            User savedUser = userService.register(user);
 
-        // 저장된 사용자의 id로 내 정보 페이지로 리다이렉트
-        return "redirect:/users/" + savedUser.getId();
+            // 회원가입 후 자동 로그인
+            session.setAttribute("loginUser", savedUser);
+
+            return "redirect:/users/" + savedUser.getId();
+        } catch (IllegalStateException | IllegalArgumentException e) {
+            model.addAttribute("user", user);
+            model.addAttribute("message", e.getMessage());
+            return "signup";
+        }
     }
 
+    // 내 정보 페이지 (로그인 자체는 인터셉터가 확인)
+    // 여기서는 본인 정보만 조회 가능하도록 추가 체크
     @GetMapping("/users/{id}")
-    public String myPage(@PathVariable Long id, Model model) {
+    public String myPage(@PathVariable Long id,
+                         HttpSession session,
+                         Model model) {
+
+        User loginUser = (User) session.getAttribute("loginUser");
+
+        // 본인 정보만 접근 가능
+        if (!loginUser.getId().equals(id)) {
+            return "redirect:/";
+        }
+
         User user = userService.findById(id);
         model.addAttribute("user", user);
         return "user-info";
     }
 
+    // 메인 페이지
     @GetMapping("/")
     public String mainPage(@RequestParam(required = false) String name, Model model) {
         model.addAttribute("name", name);
-        return "main"; // -> templates/main.html 렌더링
+        return "main";
     }
 
-
-    // 로그인 실패
+    // 로그인 폼
     @GetMapping("/login")
     public String showLoginForm(@RequestParam(value = "error", required = false) String error,
                                 Model model) {
@@ -68,32 +87,23 @@ public class UserController {
                         HttpSession session) {
 
         User user = userService.findByUsername(username);
-        if (user == null || !user.getPassword().equals(password)) {
 
+        if (user == null || !passwordEncoder.matches(password, user.getPassword())) {
             ra.addAttribute("error", "true");
             return "redirect:/login";
         }
 
         session.setAttribute("loginUser", user);
 
-        // 관리자면 관리자 대시보드로 이동
-        if (user.isAdmin()) {
-            return "redirect:/admin/dashboard";
-        }
-
 
 
         return "redirect:/";
-
     }
 
     // 로그아웃
     @GetMapping("/logout")
     public String logout(HttpSession session) {
-        session.invalidate(); // 세션 전체 무효화 (로그아웃)
-        return "redirect:/"; // 메인 페이지로 이동
+        session.invalidate();
+        return "redirect:/";
     }
-
-
-
 }

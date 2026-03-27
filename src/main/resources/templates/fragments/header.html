@@ -1,0 +1,20 @@
+
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="ko">
+<body>
+<header class="site-header" th:fragment="header">
+    <div class="container">
+        <a class="brand" th:href="@{/}">Courage</a>
+
+        <nav class="nav">
+            <a th:href="@{/okr}">OKR</a>
+            <a th:href="@{/posts}">Board</a>
+        </nav>
+
+        <div class="nav-right">
+            <a class="btn btn-ghost" th:href="@{/login}">Login</a>
+        </div>
+    </div>
+</header>
+</body>
+</html>

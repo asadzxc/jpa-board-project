@@ -1,0 +1,633 @@
+/* =========================
+   OKR KR DETAIL
+   scope: body.okr-detail
+   JS 없는 주간 상세 버전
+   ========================= */
+
+.okr-detail{
+  --text: rgba(255,255,255,.92);
+  --muted: rgba(255,255,255,.74);
+  --border: rgba(255,255,255,.22);
+  --glass: rgba(255,255,255,.10);
+  --glass-strong: rgba(255,255,255,.16);
+  --shadow: 0 18px 60px rgba(0,0,0,.25);
+
+  --ok: #39c6d6;
+
+  color: var(--text);
+}
+
+/* wrap: glass card */
+.okr-detail .wrap{
+  width: min(940px, 92vw);
+  margin: 34px auto;
+  padding: 22px;
+
+  background: var(--glass);
+  border: 1px solid var(--border);
+  border-radius: 18px;
+
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+
+  box-shadow: var(--shadow);
+}
+
+/* Title / sub */
+.okr-detail .title{
+  margin: 0 0 8px;
+  font-size: 24px;
+  font-weight: 900;
+  letter-spacing: -0.3px;
+  line-height: 1.35;
+}
+
+.okr-detail .sub{
+  margin: 6px 0 10px;
+  color: var(--muted);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.okr-detail .range{
+  color: var(--muted);
+}
+
+.okr-detail .ddayLabel,
+.okr-detail .ddayValue{
+  font-weight: 900;
+  color: rgba(57,198,214,.95);
+}
+
+/* =========================
+   Top controls
+   ========================= */
+.okr-detail .viewTabs{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  margin: 16px 0 14px;
+  flex-wrap: wrap;
+}
+
+.okr-detail .tabLeft{
+  display:flex;
+  gap:8px;
+  flex-wrap: wrap;
+}
+
+/* ✅ 역할 분리 구조 대응 */
+.okr-detail .krJump{
+  display:flex;
+  align-items:center;
+  justify-content:flex-end;
+  gap:10px;
+  flex-wrap:wrap;
+}
+
+.okr-detail .kr-jump-form{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  flex-wrap:nowrap;
+}
+
+.okr-detail .krNav{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  flex-wrap:wrap;
+}
+
+/* Buttons common */
+.okr-detail .tabBtn,
+.okr-detail .btn{
+  font: inherit;
+  border: 1px solid var(--border);
+  background: rgba(255,255,255,.10);
+  color: var(--text);
+
+  padding: 8px 12px;
+  border-radius: 999px;
+  cursor: pointer;
+
+  transition: transform .06s ease, background .18s ease, border-color .18s ease, opacity .18s ease;
+  white-space: nowrap;
+}
+
+.okr-detail .tabBtn:hover,
+.okr-detail .btn:hover{
+  background: rgba(255,255,255,.14);
+}
+
+.okr-detail .tabBtn:active,
+.okr-detail .btn:active{
+  transform: translateY(1px);
+}
+
+.okr-detail .tabBtn.active{
+  background: rgba(57,198,214,.22);
+  border-color: rgba(57,198,214,.55);
+}
+
+.okr-detail .btn.ok{
+  background: rgba(57,198,214,.35);
+  border-color: rgba(57,198,214,.60);
+  color: #fff;
+}
+
+.okr-detail a.tabBtn,
+.okr-detail a.tabBtn:visited,
+.okr-detail a.tabBtn:hover,
+.okr-detail a.tabBtn:active,
+.okr-detail a.btn,
+.okr-detail a.btn:visited,
+.okr-detail a.btn:hover,
+.okr-detail a.btn:active{
+  text-decoration:none;
+  color: inherit;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+}
+
+.okr-detail .disabled-tab{
+  opacity:.35;
+  pointer-events:none;
+}
+
+/* =========================
+   Select (glass)
+   ========================= */
+.okr-detail .selectWrap{
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+}
+
+.okr-detail .krSelect{
+  appearance: none;
+  -webkit-appearance: none;
+
+  max-width: 320px;
+  padding: 10px 44px 10px 14px;
+  border-radius: 999px;
+
+  border: 1px solid rgba(255,255,255,.28);
+  background: rgba(255,255,255,.14);
+  color: rgba(255,255,255,.92);
+
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+
+  box-shadow: 0 10px 30px rgba(0,0,0,.18);
+}
+
+.okr-detail .krSelect:focus{
+  outline: none;
+  border-color: rgba(57,198,214,.65);
+  box-shadow: 0 0 0 4px rgba(57,198,214,.18), 0 14px 40px rgba(0,0,0,.18);
+}
+
+.okr-detail .selectWrap::after{
+  content: "▾";
+  position:absolute;
+  right: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  pointer-events:none;
+  color: rgba(255,255,255,.92);
+  font-size: 22px;
+  font-weight: 900;
+  line-height: 1;
+}
+
+.okr-detail .krSelect option{
+  color:#111827;
+  background:#ffffff;
+}
+
+/* =========================
+   Stats
+   ========================= */
+.okr-detail .viewBox{
+  margin-top: 10px;
+}
+
+.okr-detail .stats{
+  display:flex;
+  align-items:baseline;
+  justify-content:space-between;
+  gap:12px;
+  margin: 12px 0 16px;
+  flex-wrap: wrap;
+}
+
+.okr-detail .percent{
+  font-size: 30px;
+  font-weight: 950;
+  letter-spacing: -0.4px;
+}
+
+.okr-detail .muted{
+  color: var(--muted);
+  font-size: 13px;
+}
+
+/* =========================
+   Week bars
+   ========================= */
+.okr-detail .bars{
+  display:grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 8px;
+}
+
+.okr-detail .bar{
+  height: 120px;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: rgba(255,255,255,.08);
+
+  display:flex;
+  align-items:flex-end;
+  justify-content:center;
+
+  position: relative;
+  overflow: hidden;
+}
+
+.okr-detail .bar::after{
+  content:"";
+  width:100%;
+  height:0%;
+  position:absolute;
+  bottom:0;
+  left:0;
+  background: rgba(57,198,214,.55);
+  transition: height .18s ease;
+}
+
+.okr-detail .bar.done::after{
+  height:100%;
+}
+
+.okr-detail .label{
+  position:absolute;
+  bottom:6px;
+
+  font-size:12px;
+  font-weight:700;
+
+  padding: 2px 7px;
+  border-radius: 999px;
+
+  background: rgba(0,0,0,.28);
+  border: 1px solid var(--border);
+  color: var(--text);
+}
+
+/* =========================
+   Static stats card
+   ========================= */
+.okr-detail #stats h3{
+  margin: 16px 0 10px;
+  font-size: 14px;
+  letter-spacing: -0.2px;
+  color: var(--text);
+}
+
+.okr-detail .kcard{
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 12px;
+
+  background: rgba(255,255,255,.10);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+.okr-detail .kpi{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:10px;
+}
+
+.okr-detail .barline{
+  height: 10px;
+  background: rgba(255,255,255,.14);
+  border-radius: 999px;
+  margin-top: 8px;
+  border: 1px solid rgba(255,255,255,.14);
+  overflow: hidden;
+}
+
+.okr-detail .barfill{
+  height: 10px;
+  width: 0%;
+  background: rgba(57,198,214,.75);
+  border-radius: 999px;
+}
+
+/* =========================
+   Bottom actions
+   ========================= */
+.okr-detail .actions{
+  margin-top: 18px;
+  display:flex;
+  gap:12px;
+  flex-wrap: wrap;
+}
+
+/* =========================
+   Responsive
+   ========================= */
+@media (max-width: 720px){
+  .okr-detail .viewTabs{
+    align-items:flex-start;
+  }
+
+  .okr-detail .krJump{
+    width: 100%;
+    justify-content:flex-start;
+  }
+
+  .okr-detail .kr-jump-form{
+    flex-wrap: wrap;
+    width: 100%;
+  }
+
+  .okr-detail .krNav{
+    width: 100%;
+  }
+
+  .okr-detail .krSelect{
+    max-width: 100%;
+  }
+}
+
+@media (max-width: 520px){
+  .okr-detail .wrap{
+    padding: 16px;
+  }
+
+  .okr-detail .bar{
+    height: 92px;
+  }
+
+  .okr-detail .percent{
+    font-size: 26px;
+  }
+
+  .okr-detail .actions{
+    flex-direction: column;
+  }
+
+  .okr-detail .actions .btn,
+  .okr-detail .actions button,
+  .okr-detail .kr-jump-form .tabBtn,
+  .okr-detail .kr-jump-form button,
+  .okr-detail .krNav .tabBtn{
+    width: 100%;
+    justify-content: center;
+  }
+
+  .okr-detail .selectWrap,
+  .okr-detail .krSelect{
+    width: 100%;
+  }
+}
+
+/* =========================
+   Month Calendar
+   ========================= */
+.okr-detail .monthCard{
+  margin-top: 26px;
+  padding: 18px;
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  background: rgba(255,255,255,.08);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  box-shadow: 0 10px 30px rgba(0,0,0,.16);
+}
+
+.okr-detail .monthHead{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  flex-wrap:wrap;
+  margin-bottom:14px;
+}
+
+.okr-detail .monthTitle{
+  margin:0;
+  font-size:20px;
+  font-weight:900;
+  letter-spacing:-0.3px;
+  color:var(--text);
+}
+
+.okr-detail .monthNav{
+  display:flex;
+  gap:8px;
+  flex-wrap:wrap;
+}
+
+.okr-detail .monthWeekdays{
+  display:grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap:8px;
+  margin-bottom:8px;
+}
+
+.okr-detail .monthWeekdays div{
+  text-align:center;
+  font-size:13px;
+  font-weight:800;
+  color:var(--muted);
+  padding:6px 0;
+}
+
+/* 일요일 빨간색 */
+.okr-detail .monthWeekdays div:first-child{
+  color:#ff6b6b;
+  font-weight:900;
+}
+
+/* =========================
+   MONTH CALENDAR
+   ========================= */
+
+.okr-detail .monthRows{
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+}
+
+.okr-detail .monthRow{
+  display:grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap:8px;
+}
+
+/* 기본 날짜 */
+.okr-detail .monthCell{
+  min-height:88px;
+  border:1px solid rgba(255,255,255,.22);
+  border-radius:14px;
+  background: rgba(0,0,0,.25);
+  padding:10px 10px 8px;
+  position:relative;
+  overflow:hidden;
+  box-shadow:none;
+}
+
+/* 이전달 / 다음달 */
+.okr-detail .monthCell.otherMonth{
+  opacity:.35;
+}
+
+/* 체크된 날짜 */
+.okr-detail .monthCell.checked{
+  background: rgba(57,198,214,.16);
+  border-color: rgba(57,198,214,.42);
+  box-shadow:
+    inset 0 0 0 1px rgba(57,198,214,.08),
+    0 0 10px rgba(57,198,214,.08);
+}
+
+/* 오늘 날짜 (칸 색 안 바꿈) */
+.okr-detail .monthCell.today{
+  border-color: rgba(255,255,255,.22);
+  background: rgba(0,0,0,.25);
+  box-shadow:none;
+}
+
+/* 오늘 + 체크 */
+.okr-detail .monthCell.today.checked{
+  background: rgba(57,198,214,.18);
+  border-color: rgba(57,198,214,.48);
+  box-shadow:
+    inset 0 0 0 1px rgba(57,198,214,.08),
+    0 0 12px rgba(57,198,214,.10);
+}
+
+/* 날짜 숫자 */
+.okr-detail .monthDay{
+  font-size:14px;
+  font-weight:800;
+  color:var(--text);
+}
+
+/* 오늘 표시 점 */
+.okr-detail .checkDot{
+  position:absolute;
+  right:10px;
+  bottom:8px;
+  width:10px;
+  height:10px;
+  border-radius:50%;
+  background:#22c55e;
+  box-shadow:0 0 10px rgba(34,197,94,.6);
+}
+
+/* 월 달력 일요일 */
+.okr-detail .monthWeekdays div:first-child{
+  color:#ff6b6b;
+  font-weight:900;
+}
+
+/* 주간 바 일요일 */
+.okr-detail .bars .bar:last-child .label{
+  color:#ff6b6b;
+  font-weight:900;
+}
+
+/* =========================
+   RESPONSIVE
+   ========================= */
+
+@media (max-width:720px){
+  .okr-detail .monthCell{
+    min-height:72px;
+  }
+}
+
+@media (max-width:520px){
+
+  .okr-detail .monthCard{
+    padding:14px;
+  }
+
+  .okr-detail .monthRow{
+    gap:6px;
+  }
+
+  .okr-detail .monthCell{
+    min-height:88px;
+    border:1px solid rgba(255,255,255,.22);
+    border-radius:14px;
+    background: rgba(255,255,255,.08);
+    padding:10px 10px 8px;
+    position:relative;
+    overflow:hidden;
+    box-shadow:none;
+  }
+
+  .okr-detail .monthDay{
+    font-size:13px;
+  }
+
+  .okr-detail .checkDot{
+    right:8px;
+    bottom:6px;
+    width:8px;
+    height:8px;
+  }
+}
+
+/* =========================
+   OKR ACTION BUTTONS
+   ========================= */
+
+.okr-detail .okrActions{
+  display:flex;
+  justify-content:center;
+  gap:12px;
+  margin-top:20px;
+}
+
+.okr-detail .btnCheck{
+  padding:10px 16px;
+  border-radius:999px;
+  border:1px solid rgba(57,198,214,.45);
+  background: rgba(57,198,214,.18);
+  color:#e6fbff;
+  font-weight:700;
+  backdrop-filter: blur(6px);
+}
+
+.okr-detail .btnList{
+  padding:10px 16px;
+  border-radius:999px;
+  border:1px solid rgba(255,255,255,.25);
+  background: rgba(255,255,255,.10);
+  color:#fff;
+  text-decoration:none;
+  font-weight:700;
+}
+
+.okr-detail .okrHint{
+  text-align:center;
+  margin-top:8px;
+  font-size:13px;
+  color:rgba(255,255,255,.65);
+}
+
+
